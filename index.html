@@ -259,7 +259,7 @@
     </div>
   </div>
 
-  <foot-bar :active-btn="1"></foot-bar>
+  <foot-bar :active-btn="1" :unread="unreadCount"></foot-bar>
 </div>
 
 <script src="./js/vue.js"></script>
@@ -277,11 +277,13 @@ new Vue({
     searchKey: '',
     blogLoading: false,
     blogLoadingMore: false,
-    isReachBottom: false
+    isReachBottom: false,
+    unreadCount: 0
   },
   mounted() {
     this.loadTypes();
     this.loadBlogs();
+    this.loadUnreadCount();
     window.addEventListener('scroll', this.onScroll);
   },
   methods: {
@@ -296,6 +298,14 @@ new Vue({
           this.blogs = this.blogs.concat(data);
         })
         .finally(() => { this.blogLoading = false; this.blogLoadingMore = false; });
+    },
+    loadUnreadCount() {
+      axios.get('/message/unread')
+        .then(({data}) => {
+          if (data) {
+            this.unreadCount = (data.interact || 0) + (data.system || 0) + (data.order || 0);
+          }
+        }).catch(() => {});
     },
     onScroll() {
       const scrollTop = window.scrollY;

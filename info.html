@@ -388,7 +388,7 @@
     </div>
   </div>
 
-  <foot-bar :active-btn="4"></foot-bar>
+  <foot-bar :active-btn="4" :unread="unreadCount"></foot-bar>
 </div>
 
 <script src="./js/vue.js"></script>
@@ -406,10 +406,12 @@ new Vue({
     blogs2: [],
     activeTab: 1,
     showLogout: false,
-    params: { minTime: 0, offset: 0 }
+    params: { minTime: 0, offset: 0 },
+    unreadCount: 0
   },
   created() {
     this.loadUser();
+    this.loadUnreadCount();
   },
   methods: {
     loadUser() {
@@ -428,6 +430,14 @@ new Vue({
     loadBlogs() {
       axios.get('/blog/of/me')
         .then(({data}) => { this.blogs = data || []; });
+    },
+    loadUnreadCount() {
+      axios.get('/message/unread')
+        .then(({data}) => {
+          if (data) {
+            this.unreadCount = (data.interact || 0) + (data.system || 0) + (data.order || 0);
+          }
+        }).catch(() => {});
     },
     loadFollowBlogs() {
       axios.get('/blog/of/follow', {

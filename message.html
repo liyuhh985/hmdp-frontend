@@ -5,49 +5,403 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <title>黑马点评 - 消息</title>
   <link rel="stylesheet" href="./css/element.css">
-  <link href="./css/main.css" rel="stylesheet">
   <style>
-    .empty-page {
-      height: 80vh;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 12px; }
+    body { background: #f5f5f5; font-family: -apple-system, "PingFang SC", sans-serif; padding-bottom: 60px; }
+    
+    /* 顶部 */
+    .header {
+      background: white;
+      padding: 15px;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
       align-items: center;
-      color: #999;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
     }
-    .empty-page i {
-      font-size: 64px;
-      margin-bottom: 20px;
-      color: #ddd;
+    .back-btn {
+      font-size: 20px;
+      color: #333;
+      padding: 5px;
+      margin-right: 10px;
     }
-    .empty-page p {
+    .header-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    /* Tab切换 */
+    .tab-bar {
+      display: flex;
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      position: sticky;
+      top: 52px;
+      z-index: 99;
+    }
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      padding: 14px 0;
       font-size: 14px;
+      color: #666;
+      position: relative;
+    }
+    .tab-item.active {
+      color: #ff6633;
+      font-weight: 500;
+    }
+    .tab-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 3px;
+      background: #ff6633;
+      border-radius: 2px;
+    }
+    .tab-badge {
+      display: inline-block;
+      min-width: 16px;
+      height: 16px;
+      background: #ff4444;
+      color: white;
+      font-size: 10px;
+      border-radius: 8px;
+      text-align: center;
+      line-height: 16px;
+      margin-left: 4px;
+      padding: 0 4px;
+    }
+    
+    /* 消息列表 */
+    .msg-list {
+      padding: 10px;
+    }
+    .msg-card {
+      display: flex;
+      padding: 14px;
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .msg-card.unread {
+      background: linear-gradient(180deg, #fff 0%, #fff9f5 100%);
+    }
+    .msg-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .msg-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .msg-title {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+    .msg-time {
+      font-size: 11px;
+      color: #bbb;
+    }
+    .msg-text {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.5;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .msg-preview {
+      font-size: 12px;
+      color: #999;
+      margin-top: 6px;
+      padding: 8px;
+      background: #f9f9f9;
+      border-radius: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .msg-preview img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .unread-dot {
+      width: 8px;
+      height: 8px;
+      background: #ff4444;
+      border-radius: 50%;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #ccc;
+    }
+    .empty-state i {
+      font-size: 64px;
+      margin-bottom: 15px;
+    }
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .empty-state .hint {
+      font-size: 12px;
+      color: #bbb;
+    }
+    
+    /* 底部导航 */
+    .foot {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      background: #fff !important;
+      height: 55px !important;
+      z-index: 9999 !important;
+      display: flex !important;
+      justify-content: space-around !important;
+      align-items: center !important;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.08) !important;
+    }
+    .foot-box { display: flex !important; flex-direction: column !important; align-items: center !important; padding: 5px 10px !important; color: #999 !important; position: relative; }
+    .foot-box.active { color: #ff6633 !important; }
+    .foot-view { font-size: 20px !important; height: 24px; line-height: 24px !important; }
+    .foot-text { font-size: 10px !important; height: 14px; line-height: 14px !important; margin-top: 2px !important; }
+    .foot .add-btn { width: 44px !important; height: 44px !important; border-radius: 22px !important; }
+    .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 5px;
+      min-width: 16px;
+      height: 16px;
+      background: #ff4444;
+      color: white;
+      font-size: 10px;
+      border-radius: 8px;
+      text-align: center;
+      line-height: 16px;
+      padding: 0 4px;
     }
   </style>
 </head>
 <body>
 <div id="app">
+  <!-- 顶部 -->
   <div class="header">
-    <div class="header-back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
+    <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
     <div class="header-title">消息</div>
-    <div class="header-share"></div>
   </div>
-  <div class="empty-page">
-    <i class="el-icon-chat-dot-round"></i>
-    <p>暂无新消息</p>
-    <p style="font-size: 12px; color: #bbb; margin-top: 10px;">去关注一些有趣的用户吧</p>
+  
+  <!-- Tab -->
+  <div class="tab-bar">
+    <div class="tab-item" :class="{active: activeTab === 1}" @click="switchTab(1)">
+      互动
+      <span class="tab-badge" v-if="unreadCount.interact > 0">{{unreadCount.interact > 99 ? '99+' : unreadCount.interact}}</span>
+    </div>
+    <div class="tab-item" :class="{active: activeTab === 2}" @click="switchTab(2)">
+      系统
+      <span class="tab-badge" v-if="unreadCount.system > 0">{{unreadCount.system > 99 ? '99+' : unreadCount.system}}</span>
+    </div>
+    <div class="tab-item" :class="{active: activeTab === 3}" @click="switchTab(3)">
+      订单
+      <span class="tab-badge" v-if="unreadCount.order > 0">{{unreadCount.order > 99 ? '99+' : unreadCount.order}}</span>
+    </div>
   </div>
-  <foot-bar :active-btn="3"></foot-bar>
+  
+  <!-- 消息列表 -->
+  <div class="msg-list">
+    <!-- 互动消息 -->
+    <template v-if="activeTab === 1">
+      <div class="msg-card" v-for="msg in interactMsgs" :key="msg.id" :class="{unread: !msg.isRead}" @click="readMsg(msg)">
+        <img class="msg-avatar" :src="msg.fromUserIcon || '/imgs/icons/default-icon.png'">
+        <div class="msg-content">
+          <div class="msg-header">
+            <span class="msg-title">{{msg.fromUserName}}</span>
+            <span class="msg-time">{{formatTime(msg.createTime)}}</span>
+          </div>
+          <div class="msg-text">
+            <template v-if="msg.type === 1">赞了你的笔记</template>
+            <template v-else-if="msg.type === 2">评论了你的笔记</template>
+            <template v-else-if="msg.type === 3">关注了你</template>
+          </div>
+          <div class="msg-preview" v-if="msg.blogTitle">
+            "{{msg.blogTitle}}"
+          </div>
+        </div>
+        <div class="unread-dot" v-if="!msg.isRead"></div>
+      </div>
+      <div class="empty-state" v-if="interactMsgs.length === 0 && !loading">
+        <i class="el-icon-chat-dot-round"></i>
+        <p>暂无互动消息</p>
+        <p class="hint">发布笔记让更多人看到你</p>
+      </div>
+    </template>
+    
+    <!-- 系统消息 -->
+    <template v-if="activeTab === 2">
+      <div class="msg-card" v-for="msg in systemMsgs" :key="msg.id" :class="{unread: !msg.isRead}">
+        <img class="msg-avatar" src="/imgs/icons/default-icon.png">
+        <div class="msg-content">
+          <div class="msg-header">
+            <span class="msg-title">系统通知</span>
+            <span class="msg-time">{{formatTime(msg.createTime)}}</span>
+          </div>
+          <div class="msg-text">{{msg.content}}</div>
+        </div>
+      </div>
+      <div class="empty-state" v-if="systemMsgs.length === 0 && !loading">
+        <i class="el-icon-bell"></i>
+        <p>暂无系统消息</p>
+      </div>
+    </template>
+    
+    <!-- 订单消息 -->
+    <template v-if="activeTab === 3">
+      <div class="msg-card" v-for="msg in orderMsgs" :key="msg.id" :class="{unread: !msg.isRead}">
+        <img class="msg-avatar" src="/imgs/icons/default-icon.png">
+        <div class="msg-content">
+          <div class="msg-header">
+            <span class="msg-title">订单通知</span>
+            <span class="msg-time">{{formatTime(msg.createTime)}}</span>
+          </div>
+          <div class="msg-text">{{msg.content}}</div>
+        </div>
+      </div>
+      <div class="empty-state" v-if="orderMsgs.length === 0 && !loading">
+        <i class="el-icon-tickets"></i>
+        <p>暂无订单消息</p>
+        <p class="hint">抢购成功后会收到通知哦</p>
+      </div>
+    </template>
+  </div>
+
+  <foot-bar :active-btn="3" :unread="totalUnread"></foot-bar>
 </div>
+
 <script src="./js/vue.js"></script>
 <script src="./js/axios.min.js"></script>
 <script src="./js/element.js"></script>
 <script src="./js/common.js"></script>
 <script src="./js/footer.js"></script>
 <script>
-const app = new Vue({
-  el: "#app",
+new Vue({
+  el: '#app',
+  data: {
+    activeTab: 1,
+    loading: false,
+    interactMsgs: [],
+    systemMsgs: [],
+    orderMsgs: [],
+    unreadCount: {
+      interact: 0,
+      system: 0,
+      order: 0
+    }
+  },
+  computed: {
+    totalUnread() {
+      return this.unreadCount.interact + this.unreadCount.system + this.unreadCount.order;
+    }
+  },
+  mounted() {
+    this.loadMessages();
+    this.loadUnreadCount();
+  },
   methods: {
+    switchTab(tab) {
+      this.activeTab = tab;
+      this.loadMessages();
+    },
+    loadMessages() {
+      this.loading = true;
+      const type = this.activeTab;
+      axios.get('/message/list', {
+        params: { type }
+      }).then(({data}) => {
+        if (type === 1) this.interactMsgs = data || [];
+        else if (type === 2) this.systemMsgs = data || [];
+        else if (type === 3) this.orderMsgs = data || [];
+      }).catch(err => {
+        console.error(err);
+      }).finally(() => {
+        this.loading = false;
+      });
+    },
+    loadUnreadCount() {
+      axios.get('/message/unread')
+        .then(({data}) => {
+          if (data) {
+            this.unreadCount = {
+              interact: data.interact || 0,
+              system: data.system || 0,
+              order: data.order || 0
+            };
+          }
+        }).catch(err => {
+          console.error(err);
+        });
+    },
+    readMsg(msg) {
+      if (msg.isRead) {
+        this.goToDetail(msg);
+        return;
+      }
+      axios.put('/message/read/' + msg.id)
+        .then(() => {
+          msg.isRead = true;
+          this.unreadCount.interact--;
+          this.goToDetail(msg);
+        }).catch(err => {
+          console.error(err);
+        });
+    },
+    goToDetail(msg) {
+      if (msg.type === 3) {
+        // 关注消息，跳转到用户主页
+        location.href = '/other-info.html?id=' + msg.fromUserId;
+      } else if (msg.blogId) {
+        // 点赞/评论消息，跳转到笔记详情
+        location.href = '/blog-detail.html?id=' + msg.blogId;
+      }
+    },
+    formatTime(time) {
+      if (!time) return '';
+      const d = new Date(time);
+      const now = new Date();
+      const diff = (now - d) / 1000;
+      
+      if (diff < 60) return '刚刚';
+      if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+      if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+      if (diff < 604800) return Math.floor(diff / 86400) + '天前';
+      
+      return (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    },
     goBack() {
       history.back();
     }
