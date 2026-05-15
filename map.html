@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>黑马点评 - 地图</title>
+  <link rel="stylesheet" href="./css/element.css">
+  <link href="./css/main.css" rel="stylesheet">
+  <script src="https://webapi.amap.com/maps?v=2.0&key=c9df68c68375e9662ac002882424a9c5"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #app { height: 100%; width: 100%; background: #f5f5f5; }
+    
+    #map-container { width: 100%; height: calc(100vh - 50px); }
+    
+    /* 顶部搜索 */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 10px 12px;
+      background: linear-gradient(to bottom, rgba(255,102,51,0.95), rgba(255,102,51,0.8));
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 20px;
+      padding: 8px 15px;
+    }
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      background: transparent;
+    }
+    .search-box input::placeholder { color: #bbb; }
+    .search-box .icon { color: #999; font-size: 16px; margin-right: 8px; }
+    
+    /* 类型筛选 - 浮动胶囊 */
+    .filter-bar {
+      position: absolute;
+      top: 60px;
+      left: 12px;
+      right: 12px;
+      z-index: 99;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 5px 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-tag {
+      flex-shrink: 0;
+      padding: 6px 14px;
+      background: white;
+      border-radius: 16px;
+      font-size: 13px;
+      color: #666;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    .filter-tag:active { transform: scale(0.95); }
+    .filter-tag.on { background: #ff6633; color: white; }
+    
+    /* 定位按钮 */
+    .locate-btn {
+      position: absolute;
+      right: 12px;
+      bottom: 140px;
+      z-index: 99;
+      width: 42px;
+      height: 42px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ff6633;
+      font-size: 20px;
+    }
+    .locate-btn:active { background: #f5f5f5; }
+    
+    /* 底部店铺面板 */
+    .shop-panel {
+      position: absolute;
+      bottom: 50px;
+      left: 0;
+      right: 0;
+      z-index: 99;
+      background: white;
+      border-radius: 16px 16px 0 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+      max-height: 180px;
+    }
+    .panel-header {
+      padding: 12px 15px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .panel-header .title { font-size: 14px; font-weight: 600; color: #333; }
+    .panel-header .count { font-size: 12px; color: #999; }
+    .shop-scroll {
+      display: flex;
+      gap: 10px;
+      padding: 10px 15px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .shop-scroll::-webkit-scrollbar { display: none; }
+    .shop-item {
+      flex-shrink: 0;
+      width: 160px;
+      padding: 10px;
+      background: #fafafa;
+      border-radius: 10px;
+    }
+    .shop-item .name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .shop-item .meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .shop-item .score { color: #ff6633; }
+    .shop-item .dist { color: #999; }
+    
+    /* 空状态 */
+    .empty-hint {
+      padding: 20px;
+      text-align: center;
+      color: #999;
+      font-size: 13px;
+    }
+    
+    /* 信息弹窗 */
+    .pop-card {
+      min-width: 140px;
+      padding: 10px;
+    }
+    .pop-card .name { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .pop-card .addr { font-size: 11px; color: #999; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pop-card .action { display: flex; justify-content: space-between; align-items: center; }
+    .pop-card .score { font-size: 12px; color: #ff6633; }
+    .pop-card .btn { font-size: 12px; color: #409eff; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- 搜索栏 -->
+  <div class="top-bar">
+    <div class="search-box">
+      <i class="icon el-icon-search"></i>
+      <input type="text" placeholder="搜索附近美食、商家" v-model="keyword" @keyup.enter="search">
+    </div>
+  </div>
+  
+  <!-- 类型筛选 -->
+  <div class="filter-bar">
+    <div class="filter-tag" :class="{on: activeType === 0}" @click="switchType(0)">附近</div>
+    <div class="filter-tag" :class="{on: activeType === t.id}" v-for="t in types" :key="t.id" @click="switchType(t.id)">{{t.name}}</div>
+  </div>
+  
+  <!-- 地图 -->
+  <div id="map-container"></div>
+  
+  <!-- 定位 -->
+  <div class="locate-btn" @click="relocate">
+    <i class="el-icon-aim"></i>
+  </div>
+  
+  <!-- 底部店铺 -->
+  <div class="shop-panel" v-if="shops.length">
+    <div class="panel-header">
+      <span class="title">{{activeType ? getTypeName(activeType) : '附近推荐'}}</span>
+      <span class="count">共{{shops.length}}家</span>
+    </div>
+    <div class="shop-scroll">
+      <div class="shop-item" v-for="s in shops" :key="s.id" @click="goDetail(s.id)">
+        <div class="name">{{s.name}}</div>
+        <div class="meta">
+          <span class="score">★ {{(s.score/10).toFixed(1)}}</span>
+          <span class="dist">{{fmtDist(s.distance)}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="shop-panel" v-else-if="loaded && !shops.length">
+    <div class="empty-hint">附近暂无店铺</div>
+  </div>
+
+  <foot-bar :active-btn="2"></foot-bar>
+</div>
+
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script src="./js/element.js"></script>
+<script src="./js/common.js"></script>
+<script src="./js/footer.js"></script>
+<script>
+new Vue({
+  el: '#app',
+  data: {
+    map: null,
+    myPos: null,
+    types: [],
+    activeType: 0,
+    shops: [],
+    markers: [],
+    keyword: '',
+    loaded: false
+  },
+  mounted() {
+    this.loadTypes();
+    this.initMap();
+  },
+  methods: {
+    initMap() {
+      this.map = new AMap.Map('map-container', {
+        zoom: 15,
+        center: [120.15, 30.28]
+      });
+      
+      this.map.on('complete', () => {
+        this.findMe();
+      });
+    },
+    
+    findMe() {
+      AMap.plugin('AMap.Geolocation', () => {
+        const geo = new AMap.Geolocation({ timeout: 8000 });
+        geo.getCurrentPosition((status, res) => {
+          if (status === 'complete') {
+            this.myPos = { x: res.position.lng, y: res.position.lat };
+            this.map.setCenter([this.myPos.x, this.myPos.y]);
+            this.addMyMarker();
+            this.fetchShops();
+          } else {
+            this.myPos = { x: 120.15, y: 30.28 };
+            this.fetchShops();
+          }
+        });
+      });
+    },
+    
+    relocate() {
+      this.findMe();
+    },
+    
+    addMyMarker() {
+      const m = new AMap.Marker({
+        position: [this.myPos.x, this.myPos.y],
+        icon: new AMap.Icon({
+          size: new AMap.Size(24, 35),
+          image: 'https://webapi.amap.com/theme/v1.3/markers/n/loc.png',
+          imageSize: new AMap.Size(24, 35)
+        })
+      });
+      this.map.add(m);
+    },
+    
+    loadTypes() {
+      axios.get('/shop-type/list').then(({data}) => this.types = data);
+    },
+    
+    switchType(tid) {
+      this.activeType = tid;
+      this.clearMarkers();
+      this.shops = [];
+      this.fetchShops();
+    },
+    
+    fetchShops() {
+      if (!this.myPos) return;
+      this.loaded = false;
+      
+      const fetch = (typeId, done) => {
+        axios.get('/shop/of/type', {
+          params: { typeId, current: 1, x: this.myPos.x, y: this.myPos.y }
+        }).then(({data}) => {
+          if (data) {
+            this.shops = this.shops.concat(data);
+            data.forEach(s => this.addMarker(s));
+          }
+          if (done) done();
+        }).catch(() => { if (done) done(); });
+      };
+      
+      if (this.activeType === 0) {
+        // 全部类型
+        let pending = this.types.length;
+        this.types.forEach(t => fetch(t.id, () => {
+          if (--pending === 0) this.loaded = true;
+        }));
+        if (this.types.length === 0) this.loaded = true;
+      } else {
+        fetch(this.activeType, () => this.loaded = true);
+      }
+    },
+    
+    addMarker(shop) {
+      const m = new AMap.Marker({
+        position: [shop.x, shop.y],
+        offset: new AMap.Pixel(-12, -30)
+      });
+      m.on('click', () => this.showPop(shop, m));
+      this.map.add(m);
+      this.markers.push(m);
+    },
+    
+    showPop(shop, marker) {
+      const info = new AMap.InfoWindow({
+        content: `
+          <div class="pop-card">
+            <div class="name">${shop.name}</div>
+            <div class="addr">${shop.address || ''}</div>
+            <div class="action">
+              <span class="score">★ ${(shop.score/10).toFixed(1)} · ${this.fmtDist(shop.distance)}</span>
+              <span class="btn" onclick="location.href='/shop-detail.html?id=${shop.id}'">详情</span>
+            </div>
+          </div>
+        `,
+        offset: new AMap.Pixel(0, -35)
+      });
+      info.open(this.map, marker.getPosition());
+    },
+    
+    clearMarkers() {
+      this.markers.forEach(m => this.map.remove(m));
+      this.markers = [];
+    },
+    
+    search() {
+      if (!this.keyword.trim()) return;
+      location.href = '/shop-list.html?search=' + encodeURIComponent(this.keyword.trim());
+    },
+    
+    goDetail(id) {
+      location.href = '/shop-detail.html?id=' + id;
+    },
+    
+    getTypeName(id) {
+      const t = this.types.find(x => x.id === id);
+      return t ? t.name : '';
+    },
+    
+    fmtDist(d) {
+      if (!d) return '';
+      return d < 1000 ? d.toFixed(0) + 'm' : (d/1000).toFixed(1) + 'km';
+    }
+  }
+});
+</script>
+</body>
+</html>

@@ -31,10 +31,14 @@ Vue.component("footBar", {
     toPage(i) {
       if (i === 0) {
         location.href = "/blog-edit.html"
+      } else if (i === 1) {
+        location.href = "/"
+      } else if (i === 2) {
+        location.href = "/map.html"
+      } else if (i === 3) {
+        location.href = "/message.html"
       } else if (i === 4) {
         location.href = "/info.html"
-      } else if (i === 1){
-        location.href = "/"
       }
     }
   }

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>黑马点评 - 消息</title>
+  <link rel="stylesheet" href="./css/element.css">
+  <link href="./css/main.css" rel="stylesheet">
+  <style>
+    .empty-page {
+      height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #999;
+    }
+    .empty-page i {
+      font-size: 64px;
+      margin-bottom: 20px;
+      color: #ddd;
+    }
+    .empty-page p {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
+    <div class="header-title">消息</div>
+    <div class="header-share"></div>
+  </div>
+  <div class="empty-page">
+    <i class="el-icon-chat-dot-round"></i>
+    <p>暂无新消息</p>
+    <p style="font-size: 12px; color: #bbb; margin-top: 10px;">去关注一些有趣的用户吧</p>
+  </div>
+  <foot-bar :active-btn="3"></foot-bar>
+</div>
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script src="./js/element.js"></script>
+<script src="./js/common.js"></script>
+<script src="./js/footer.js"></script>
+<script>
+const app = new Vue({
+  el: "#app",
+  methods: {
+    goBack() {
+      history.back();
+    }
+  }
+});
+</script>
+</body>
+</html>

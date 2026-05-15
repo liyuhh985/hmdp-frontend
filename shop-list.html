@@ -11,14 +11,42 @@
   <link href="./css/main.css" rel="stylesheet">
 
   <style type="text/css">
-
+    /* 空状态样式 */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 80px 0;
+      color: #999;
+    }
+    .empty-state i {
+      font-size: 48px;
+      color: #ddd;
+      margin-bottom: 15px;
+    }
+    .empty-state p {
+      font-size: 14px;
+    }
+    /* 加载状态样式 */
+    .loading-state {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #999;
+      font-size: 12px;
+    }
+    .loading-state i {
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
 <div id="app">
   <div class="header">
     <div class="header-back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
-    <div class="header-title">{{typeName}}</div>
+    <div class="header-title">{{typeName || '搜索结果'}}</div>
     <div class="header-search">
       <i class="el-icon-search"></i>
     </div>
@@ -27,7 +55,7 @@
     <div class="sort-item">
       <el-dropdown trigger="click" @command="handleCommand">
       <span class="el-dropdown-link">
-        {{typeName}}<i class="el-icon-arrow-down el-icon--right"></i>
+        {{typeName || '全部分类'}}<i class="el-icon-arrow-down el-icon--right"></i>
       </span>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item v-for="t in types" :key="t.id" :command="t">
@@ -47,29 +75,46 @@
     </div>
   </div>
   <div class="shop-list" @scroll="onScroll">
-    <div class="shop-box" v-for="s in shops" :key="s.id" @click="toDetail(s.id)">
-      <div class="shop-img"><img :src="s.images" alt=""></div>
-      <div class="shop-info">
-        <div class="shop-title shop-item">{{s.name}}</div>
-        <div class="shop-rate shop-item" >
-          <el-rate
-              disabled v-model="s.score/10"
-              text-color="#F63"
-              show-score
-          ></el-rate>
-          <span>{{s.comments}}条</span>
-        </div>
-        <div class="shop-area shop-item">
-          <span>{{s.area}}</span>
-          <span v-if="s.distance">{{s.distance < 1000 ? s.distance.toFixed(1) + 'm' : (s.distance/1000).toFixed(1) + 'km'}}</span>
-        </div>
-        <div class="shop-avg shop-item">￥{{s.avgPrice}}/人</div>
-        <div class="shop-address shop-item">
-          <i class="el-icon-map-location"></i>
-          <span>{{s.address}}</span>
+    <!-- 加载状态 -->
+    <template v-if="loading && shops.length === 0">
+      <div class="empty-state"><i class="el-icon-loading"></i><p>加载中...</p></div>
+    </template>
+    <!-- 空状态 -->
+    <template v-else-if="!loading && shops.length === 0">
+      <div class="empty-state">
+        <i class="el-icon-shop"></i>
+        <p>{{shopName ? '未找到相关店铺' : '暂无店铺'}}</p>
+        <p style="font-size: 12px; color: #bbb; margin-top: 8px;" v-if="shopName">换个关键词试试</p>
+      </div>
+    </template>
+    <!-- 店铺列表 -->
+    <template v-else>
+      <div class="shop-box" v-for="s in shops" :key="s.id" @click="toDetail(s.id)">
+        <div class="shop-img"><img :src="s.images" alt=""></div>
+        <div class="shop-info">
+          <div class="shop-title shop-item">{{s.name}}</div>
+          <div class="shop-rate shop-item" >
+            <el-rate
+                disabled v-model="s.score/10"
+                text-color="#F63"
+                show-score
+            ></el-rate>
+            <span>{{s.comments}}条</span>
+          </div>
+          <div class="shop-area shop-item">
+            <span>{{s.area}}</span>
+            <span v-if="s.distance">{{s.distance < 1000 ? s.distance.toFixed(1) + 'm' : (s.distance/1000).toFixed(1) + 'km'}}</span>
+          </div>
+          <div class="shop-avg shop-item">￥{{s.avgPrice}}/人</div>
+          <div class="shop-address shop-item">
+            <i class="el-icon-map-location"></i>
+            <span>{{s.address}}</span>
+          </div>
         </div>
       </div>
-    </div>
+      <!-- 加载更多 -->
+      <div class="loading-state" v-if="loadingMore"><i class="el-icon-loading"></i> 加载更多...</div>
+    </template>
   </div>
 </div>
 <script src="./js/vue.js"></script>
@@ -87,6 +132,9 @@
       types: [], // 类型列表
       shops: [], // 商店列表
       typeName: "",
+      shopName: "", // 搜索关键词
+      loading: false,
+      loadingMore: false,
       params:{
         typeId: 0,
         current: 1,
@@ -99,6 +147,12 @@
       // 获取参数
       this.params.typeId = util.getUrlParam("type");
       this.typeName = util.getUrlParam("name");
+      // 获取搜索关键词
+      const searchKey = util.getUrlParam("search");
+      if (searchKey) {
+        this.shopName = searchKey;
+        this.params.name = searchKey;
+      }
       // 查询类型
       this.queryTypes();
       // 查询商店
@@ -116,6 +170,39 @@
           })
       },
       queryShops() {
+        // 设置加载状态
+        if (this.params.current === 1) {
+          this.loading = true;
+        } else {
+          this.loadingMore = true;
+        }
+        
+        // 如果有搜索关键词，使用名称搜索接口
+        if (this.shopName && this.shopName.trim()) {
+          axios.get("/shop/of/name", {
+            params: {
+              name: this.shopName.trim(),
+              current: this.params.current
+            }
+          })
+          .then(({data}) => {
+            if (!data) {
+              return
+            }
+            data.forEach(s => s.images = s.images.split(',')[0]);
+            this.shops = this.shops.concat(data);
+          })
+          .catch(err => {
+            console.log(err);
+            this.$message.error(err)
+          })
+          .finally(() => {
+            this.loading = false;
+            this.loadingMore = false;
+          })
+          return;
+        }
+        // 否则按类型查询
         axios.get("/shop/of/type", {
             params: this.params
           })
@@ -130,12 +217,18 @@
             console.log(err);
             this.$message.error(err)
           })
+          .finally(() => {
+            this.loading = false;
+            this.loadingMore = false;
+          })
       },
       handleCommand(t) {
         location.href = "/shop-list.html?type="+t.id+"&name="+t.name;
       },
       sortAndQuery(sortBy) {
         this.params.sortBy = sortBy;
+        this.shops = [];
+        this.params.current = 1;
         this.queryShops();
       },
       goBack() {
@@ -148,11 +241,10 @@
         let scrollTop = e.target.scrollTop;
         let offsetHeight = e.target.offsetHeight;
         let scrollHeight = e.target.scrollHeight;
-        if(scrollTop + offsetHeight + 1 > scrollHeight && !this.isReachBottom){
+        if(scrollTop + offsetHeight + 1 > scrollHeight && !this.isReachBottom && !this.loadingMore){
           this.isReachBottom = true
-          console.log("触底")
           this.params.current++
-          this.queryShops(this.params.current, 5);
+          this.queryShops();
         }else{
           this.isReachBottom = false
         }
