@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>黑马点评</title>
+  <link rel="stylesheet" href="./css/element.css">
+  <link href="./css/main.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 12px; }
+    body { background: #f7f7f7; font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif; padding-bottom: 60px; }
+    
+    /* 底部导航 - 强制覆盖 */
+    .foot {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      background: #fff !important;
+      height: 55px !important;
+      z-index: 9999 !important;
+      display: flex !important;
+      justify-content: space-around !important;
+      align-items: center !important;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.08) !important;
+    }
+    .foot-box {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 5px 10px !important;
+      color: #999 !important;
+    }
+    .foot-box.active { color: #ff6633 !important; }
+    .foot-view { font-size: 20px !important; height: 24px; line-height: 24px !important; }
+    .foot-text { font-size: 10px !important; height: 14px; line-height: 14px !important; margin-top: 2px !important; }
+    .foot .add-btn { width: 44px !important; height: 44px !important; border-radius: 22px !important; }
+    
+    /* 顶部 */
+    .top-area {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      padding: 20px 15px 60px;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .back-btn {
+      color: white;
+      font-size: 20px;
+      padding: 5px;
+      width: 30px;
+    }
+    .top-title {
+      flex: 1;
+      text-align: center;
+      color: white;
+      font-size: 17px;
+      margin-right: 30px;
+    }
+    
+    /* 用户卡片 */
+    .user-card {
+      background: white;
+      margin: -50px 12px 12px;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      position: relative;
+    }
+    .user-row {
+      display: flex;
+      align-items: center;
+    }
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin-right: 14px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .user-main { flex: 1; }
+    .nickname {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .user-meta {
+      font-size: 13px;
+      color: #999;
+    }
+    .user-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .action-btn {
+      flex: 1;
+      height: 36px;
+      border-radius: 18px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .action-btn:active { transform: scale(0.96); }
+    .btn-edit {
+      background: #fff5f0;
+      color: #ff6633;
+      border: 1px solid #ffd4c2;
+    }
+    .btn-logout {
+      background: #f5f5f5;
+      color: #888;
+    }
+    
+    /* 简介 */
+    .bio-row {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #f0f0f0;
+      font-size: 13px;
+      color: #888;
+      line-height: 1.5;
+    }
+    .bio-row .icon { margin-right: 4px; }
+    
+    /* 数据统计 */
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      background: white;
+      margin: 0 12px 12px;
+      border-radius: 10px;
+      padding: 14px 0;
+    }
+    .stat-item {
+      text-align: center;
+      flex: 1;
+    }
+    .stat-num {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+    
+    /* Tab区域 */
+    .tab-area {
+      background: white;
+      margin: 0 12px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .tab-header {
+      display: flex;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      padding: 14px 0;
+      font-size: 14px;
+      color: #666;
+      position: relative;
+    }
+    .tab-item.on { color: #333; font-weight: 500; }
+    .tab-item.on::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 3px;
+      background: #ff6633;
+      border-radius: 2px;
+    }
+    .tab-content {
+      padding: 12px;
+      padding-bottom: 70px;
+      min-height: 150px;
+    }
+    
+    /* 笔记卡片 */
+    .note-card {
+      display: flex;
+      background: #fafafa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .note-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 6px;
+      margin-right: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .note-info { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+    .note-title {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+      margin-bottom: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .note-meta {
+      display: flex;
+      gap: 14px;
+      font-size: 12px;
+      color: #999;
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 40px 0;
+      color: #ccc;
+    }
+    .empty-state i { font-size: 42px; margin-bottom: 10px; }
+    .empty-state p { font-size: 13px; }
+    
+    /* 自定义弹窗 */
+    .popup-mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .popup-box {
+      background: white;
+      border-radius: 12px;
+      width: 280px;
+      padding: 20px;
+      text-align: center;
+    }
+    .popup-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .popup-msg {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .popup-btns {
+      display: flex;
+      gap: 12px;
+    }
+    .popup-btn {
+      flex: 1;
+      height: 40px;
+      border-radius: 20px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .popup-btn.cancel {
+      background: #f5f5f5;
+      color: #666;
+    }
+    .popup-btn.confirm {
+      background: #ff6633;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- 顶部区域 -->
+  <div class="top-area">
+    <div class="top-bar">
+      <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
+      <div class="top-title">我的</div>
+    </div>
+  </div>
+  
+  <!-- 用户卡片 -->
+  <div class="user-card">
+    <div class="user-row">
+      <img class="avatar" :src="user.icon || '/imgs/icons/default-icon.png'">
+      <div class="user-main">
+        <div class="nickname">{{user.nickName || '用户'}}</div>
+        <div class="user-meta">杭州</div>
+      </div>
+    </div>
+    <div class="user-actions">
+      <div class="action-btn btn-edit" @click="toEdit">
+        <i class="el-icon-edit" style="margin-right:4px;font-size:14px;"></i>编辑资料
+      </div>
+      <div class="action-btn btn-logout" @click="showLogout = true">退出</div>
+    </div>
+    <div class="bio-row" v-if="info.introduce">{{info.introduce}}</div>
+    <div class="bio-row" v-else>
+      <i class="icon el-icon-edit-outline"></i>添加简介，让大家更了解你
+    </div>
+  </div>
+  
+  <!-- 数据统计 -->
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-num">{{blogs.length}}</div>
+      <div class="stat-label">笔记</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">关注</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">粉丝</div>
+    </div>
+  </div>
+  
+  <!-- Tab区域 -->
+  <div class="tab-area">
+    <div class="tab-header">
+      <div class="tab-item" :class="{on: activeTab === 1}" @click="activeTab = 1">笔记</div>
+      <div class="tab-item" :class="{on: activeTab === 2}" @click="activeTab = 2">关注</div>
+    </div>
+    <div class="tab-content">
+      <div v-if="activeTab === 1">
+        <div class="note-card" v-for="b in blogs" :key="b.id" @click="toBlog(b.id)">
+          <img class="note-img" :src="b.images.split(',')[0]">
+          <div class="note-info">
+            <div class="note-title">{{b.title}}</div>
+            <div class="note-meta">
+              <span><i class="el-icon-thumb"></i> {{b.liked || 0}}</span>
+              <span><i class="el-icon-chat-dot-round"></i> {{b.comments || 0}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" v-if="blogs.length === 0">
+          <i class="el-icon-document"></i>
+          <p>还没有发布笔记</p>
+        </div>
+      </div>
+      <div v-if="activeTab === 2">
+        <div class="note-card" v-for="b in blogs2" :key="b.id" @click="toBlog(b.id)">
+          <img class="note-img" :src="b.img">
+          <div class="note-info">
+            <div class="note-title">{{b.title}}</div>
+            <div class="note-meta">
+              <span><i class="el-icon-user"></i> {{b.name}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="empty-state" v-if="blogs2.length === 0">
+          <i class="el-icon-user"></i>
+          <p>关注的人还没发动态</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 退出弹窗 -->
+  <div class="popup-mask" v-if="showLogout" @click.self="showLogout = false">
+    <div class="popup-box">
+      <div class="popup-title">退出登录</div>
+      <div class="popup-msg">确定要退出当前账号吗？</div>
+      <div class="popup-btns">
+        <div class="popup-btn cancel" @click="showLogout = false">取消</div>
+        <div class="popup-btn confirm" @click="doLogout">确定</div>
+      </div>
+    </div>
+  </div>
+
+  <foot-bar :active-btn="4"></foot-bar>
+</div>
+
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script src="./js/element.js"></script>
+<script src="./js/common.js"></script>
+<script src="./js/footer.js"></script>
+<script>
+new Vue({
+  el: '#app',
+  data: {
+    user: {},
+    info: {},
+    blogs: [],
+    blogs2: [],
+    activeTab: 1,
+    showLogout: false,
+    params: { minTime: 0, offset: 0 }
+  },
+  created() {
+    this.loadUser();
+  },
+  methods: {
+    loadUser() {
+      axios.get('/user/me')
+        .then(({data}) => {
+          this.user = data;
+          this.loadInfo();
+          this.loadBlogs();
+        })
+        .catch(() => { location.href = 'login.html'; });
+    },
+    loadInfo() {
+      axios.get('/user/info/' + this.user.id)
+        .then(({data}) => { if (data) this.info = data; });
+    },
+    loadBlogs() {
+      axios.get('/blog/of/me')
+        .then(({data}) => { this.blogs = data || []; });
+    },
+    loadFollowBlogs() {
+      axios.get('/blog/of/follow', {
+        params: { offset: this.params.offset, lastId: this.params.minTime || Date.now() + 1 }
+      }).then(({data}) => {
+        if (data && data.list) {
+          data.list.forEach(b => b.img = b.images.split(',')[0]);
+          this.blogs2 = data.list;
+        }
+      });
+    },
+    goBack() { history.back(); },
+    toEdit() { location.href = 'info-edit.html'; },
+    doLogout() {
+      axios.post('/user/logout').then(() => {
+        sessionStorage.removeItem('token');
+        location.href = '/';
+      });
+    },
+    toBlog(id) { location.href = '/blog-detail.html?id=' + id; }
+  },
+  watch: {
+    activeTab(val) {
+      if (val === 2 && this.blogs2.length === 0) {
+        this.loadFollowBlogs();
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
