@@ -207,7 +207,7 @@
 <div id="app">
   <!-- 搜索栏 -->
   <div class="search-bar">
-    <div class="city-btn">杭州 <i class="el-icon-arrow-down"></i></div>
+    <div class="city-btn" @click="toMap">附近 <i class="el-icon-location"></i></div>
     <div class="search-input">
       <i class="el-icon-search"></i>
       <input type="text" placeholder="搜索商户、地点" v-model="searchKey" @keyup.enter="doSearch">
@@ -323,7 +323,8 @@ new Vue({
     },
     toShopList(id, name) { location.href = '/shop-list.html?type=' + id + '&name=' + name; },
     toBlogDetail(b) { location.href = '/blog-detail.html?id=' + b.id; },
-    toUserInfo() { location.href = '/info.html'; }
+    toUserInfo() { location.href = '/info.html'; },
+    toMap() { location.href = '/map.html'; }
   }
 });
 </script>
