@@ -11,7 +11,6 @@
     html { font-size: 12px; }
     body { background: #f5f5f5; font-family: -apple-system, "PingFang SC", sans-serif; padding-bottom: 20px; }
     
-    /* 顶部导航 */
     .header {
       background: white;
       padding: 15px;
@@ -22,216 +21,57 @@
       z-index: 100;
       border-bottom: 1px solid #f0f0f0;
     }
-    .back-btn {
-      font-size: 20px;
-      color: #333;
-      padding: 5px;
-      margin-right: 10px;
-    }
-    .header-title {
-      flex: 1;
-      font-size: 17px;
-      font-weight: 600;
-      color: #333;
-    }
-    .save-btn {
-      padding: 8px 16px;
-      background: #ff6633;
-      color: white;
-      border-radius: 20px;
-      font-size: 13px;
-    }
-    .save-btn.saving {
-      background: #ccc;
-    }
+    .back-btn { font-size: 20px; color: #333; padding: 5px; margin-right: 10px; }
+    .header-title { flex: 1; font-size: 17px; font-weight: 600; color: #333; }
+    .save-btn { padding: 8px 16px; background: #ff6633; color: white; border-radius: 20px; font-size: 13px; }
+    .save-btn.saving { background: #ccc; }
     
-    /* 头像区域 */
-    .avatar-section {
-      background: white;
-      padding: 30px;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .avatar-img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #ff6633;
-    }
-    .avatar-tip {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #999;
-    }
+    .avatar-section { background: white; padding: 30px; text-align: center; margin-bottom: 10px; }
+    .avatar-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #ff6633; }
+    .avatar-tip { margin-top: 10px; font-size: 12px; color: #999; }
     
-    /* 表单区域 */
-    .form-section {
-      background: white;
-      margin-bottom: 10px;
-    }
-    .form-item {
-      display: flex;
-      align-items: center;
-      padding: 15px;
-      border-bottom: 1px solid #f0f0f0;
-      min-height: 54px;
-    }
-    .form-item:last-child {
-      border-bottom: none;
-    }
-    .form-item.textarea-item {
-      align-items: flex-start;
-    }
-    .form-label {
-      width: 80px;
-      font-size: 14px;
-      color: #333;
-      flex-shrink: 0;
-      padding-top: 2px;
-    }
-    .form-label.bold {
-      font-weight: 600;
-    }
-    .form-input {
-      flex: 1;
-      border: none;
-      outline: none;
-      font-size: 14px;
-      color: #333;
-      text-align: right;
-      background: transparent;
-      min-height: 24px;
-    }
-    .form-input::placeholder {
-      color: #ccc;
-    }
-    .form-textarea {
-      flex: 1;
-      border: none;
-      outline: none;
-      font-size: 14px;
-      color: #333;
-      resize: none;
-      min-height: 40px;
-      text-align: right;
-      background: transparent;
-      line-height: 1.5;
-      font-weight: 500;
-    }
-    .form-textarea::placeholder {
-      color: #ccc;
-    }
-    .form-value {
-      flex: 1;
-      text-align: right;
-      font-size: 14px;
-      color: #666;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 5px;
-    }
-    .arrow-icon {
-      color: #ccc;
-      font-size: 12px;
-    }
+    .form-section { background: white; margin-bottom: 10px; }
+    .form-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f0f0f0; min-height: 54px; }
+    .form-item:last-child { border-bottom: none; }
+    .form-item.textarea-item { align-items: flex-start; }
+    .form-label { width: 80px; font-size: 14px; color: #333; flex-shrink: 0; padding-top: 2px; }
+    .form-label.bold { font-weight: 600; }
+    .form-input { flex: 1; border: none; outline: none; font-size: 14px; color: #333; text-align: right; background: transparent; min-height: 24px; }
+    .form-input::placeholder { color: #ccc; }
+    .form-textarea { flex: 1; border: none; outline: none; font-size: 14px; color: #333; resize: none; min-height: 40px; text-align: right; background: transparent; line-height: 1.5; font-weight: 500; }
+    .form-textarea::placeholder { color: #ccc; }
+    .form-value { flex: 1; text-align: right; font-size: 14px; color: #666; display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+    .arrow-icon { color: #ccc; font-size: 12px; }
     
-    /* Element UI 日期选择器样式覆盖 */
-    .el-date-editor.el-input {
-      width: 150px;
-    }
-    .el-input__inner {
-      border: none !important;
-      text-align: right !important;
-      padding-right: 0 !important;
-      background: transparent !important;
-      font-size: 14px !important;
-      color: #333 !important;
-    }
-    .el-input__prefix {
-      display: none !important;
-    }
-    .el-input__suffix {
-      right: 0 !important;
-    }
+    .el-date-editor.el-input { width: 150px; }
+    .el-input__inner { border: none !important; text-align: right !important; padding-right: 0 !important; background: transparent !important; font-size: 14px !important; color: #333 !important; }
+    .el-input__prefix { display: none !important; }
+    .el-input__suffix { right: 0 !important; }
     
-    /* 性别选择弹窗 */
-    .popup-mask {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: flex-end;
-    }
-    .popup-box {
-      background: white;
-      border-radius: 12px 12px 0 0;
-      width: 100%;
-    }
-    .popup-title {
-      padding: 15px;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 600;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .popup-option {
-      padding: 15px;
-      text-align: center;
-      font-size: 15px;
-      color: #333;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .popup-option:last-child {
-      border-bottom: none;
-    }
-    .popup-option.selected {
-      color: #ff6633;
-    }
-    .popup-cancel {
-      padding: 15px;
-      text-align: center;
-      font-size: 15px;
-      color: #999;
-      background: #f9f9f9;
-    }
+    .popup-mask { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: flex-end; }
+    .popup-box { background: white; border-radius: 12px 12px 0 0; width: 100%; }
+    .popup-title { padding: 15px; text-align: center; font-size: 16px; font-weight: 600; border-bottom: 1px solid #f0f0f0; }
+    .popup-option { padding: 15px; text-align: center; font-size: 15px; color: #333; border-bottom: 1px solid #f0f0f0; }
+    .popup-option:last-child { border-bottom: none; }
+    .popup-option.selected { color: #ff6633; }
+    .popup-cancel { padding: 15px; text-align: center; font-size: 15px; color: #999; background: #f9f9f9; }
     
-    /* Toast */
-    .toast {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 14px;
-      z-index: 2000;
-    }
+    .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 2000; }
   </style>
 </head>
 <body>
 <div id="app">
-  <!-- 顶部 -->
   <div class="header">
     <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
     <div class="header-title">编辑资料</div>
     <div class="save-btn" :class="{saving: saving}" @click="saveInfo">{{saving ? '保存中' : '保存'}}</div>
   </div>
   
-  <!-- 头像 -->
   <div class="avatar-section">
     <img class="avatar-img" :src="form.icon || '/imgs/icons/default-icon.png'" alt="">
     <div class="avatar-tip">点击更换头像（暂不支持）</div>
   </div>
   
-  <!-- 基本信息表单 -->
   <div class="form-section">
     <div class="form-item">
       <div class="form-label bold">昵称</div>
@@ -239,22 +79,21 @@
     </div>
     <div class="form-item textarea-item">
       <div class="form-label bold">个人介绍</div>
-      <textarea class="form-textarea" v-model.trim="form.introduce" placeholder="介绍一下自己吧" maxlength="100" rows="2"></textarea>
+      <textarea class="form-textarea" v-model.trim="form.introduce" placeholder="介绍一下自己吧" maxlength="128" rows="2"></textarea>
     </div>
   </div>
   
-  <!-- 详细信息表单 -->
   <div class="form-section">
     <div class="form-item" @click="showGenderPicker = true">
       <div class="form-label">性别</div>
       <div class="form-value">
-        <span>{{form.gender || '未设置'}}</span>
+        <span>{{genderText}}</span>
         <i class="el-icon-arrow-right arrow-icon"></i>
       </div>
     </div>
     <div class="form-item">
       <div class="form-label">城市</div>
-      <input class="form-input" type="text" v-model.trim="form.city" placeholder="请输入城市">
+      <input class="form-input" type="text" v-model.trim="form.city" placeholder="请输入城市" maxlength="20">
     </div>
     <div class="form-item">
       <div class="form-label">出生年月</div>
@@ -263,25 +102,22 @@
         type="month"
         placeholder="请选择年月"
         format="yyyy年MM月"
-        value-format="yyyy-MM"
-        :picker-options="pickerOptions"
-        @change="handleBirthdayChange">
+        value-format="yyyy-MM-01"
+        :picker-options="pickerOptions">
       </el-date-picker>
     </div>
   </div>
   
-  <!-- 性别选择弹窗 -->
   <div class="popup-mask" v-if="showGenderPicker" @click.self="showGenderPicker = false">
     <div class="popup-box">
       <div class="popup-title">选择性别</div>
-      <div class="popup-option" :class="{selected: form.gender === '男'}" @click="selectGender('男')">男</div>
-      <div class="popup-option" :class="{selected: form.gender === '女'}" @click="selectGender('女')">女</div>
-      <div class="popup-option" :class="{selected: form.gender === '保密'}" @click="selectGender('保密')">保密</div>
+      <div class="popup-option" :class="{selected: form.gender === false}" @click="selectGender(false)">男</div>
+      <div class="popup-option" :class="{selected: form.gender === true}" @click="selectGender(true)">女</div>
+      <div class="popup-option" :class="{selected: form.gender === null}" @click="selectGender(null)">保密</div>
       <div class="popup-cancel" @click="showGenderPicker = false">取消</div>
     </div>
   </div>
   
-  <!-- Toast -->
   <div class="toast" v-if="toastShow">{{toastMsg}}</div>
 </div>
 
@@ -298,7 +134,7 @@ new Vue({
       nickName: '',
       icon: '',
       introduce: '',
-      gender: '',
+      gender: null,
       city: '',
       birthday: ''
     },
@@ -310,6 +146,13 @@ new Vue({
       disabledDate(time) {
         return time.getTime() > Date.now();
       }
+    }
+  },
+  computed: {
+    genderText() {
+      if (this.form.gender === false) return '男';
+      if (this.form.gender === true) return '女';
+      return '保密';
     }
   },
   created() {
@@ -331,34 +174,26 @@ new Vue({
         .then(({data}) => {
           if (data) {
             this.form.introduce = data.introduce || '';
-            this.form.gender = data.gender || '';
+            this.form.gender = data.gender;
             this.form.city = data.city || '';
-            // 如果生日格式是 yyyy-MM-dd，截取前7位变成 yyyy-MM
-            if (data.birthday && data.birthday.length >= 7) {
-              this.form.birthday = data.birthday.substring(0, 7);
-            } else {
-              this.form.birthday = data.birthday || '';
+            if (data.birthday) {
+              // LocalDate 格式: yyyy-MM-dd，转成 yyyy-MM-01
+              this.form.birthday = data.birthday.substring(0, 7) + '-01';
             }
           }
         });
     },
-    selectGender(gender) {
-      this.form.gender = gender;
+    selectGender(val) {
+      this.form.gender = val;
       this.showGenderPicker = false;
-    },
-    handleBirthdayChange(val) {
-      this.form.birthday = val;
     },
     showToast(msg) {
       this.toastMsg = msg;
       this.toastShow = true;
-      setTimeout(() => {
-        this.toastShow = false;
-      }, 2000);
+      setTimeout(() => { this.toastShow = false; }, 2000);
     },
     saveInfo() {
       if (this.saving) return;
-      
       if (!this.form.nickName) {
         this.showToast('请输入昵称');
         return;
@@ -366,33 +201,33 @@ new Vue({
       
       this.saving = true;
       
-      axios.put('/user/info', {
+      // 发送数据，gender 转成布尔值，birthday 保持 yyyy-MM-dd 格式
+      const data = {
         nickName: this.form.nickName,
         introduce: this.form.introduce,
         gender: this.form.gender,
         city: this.form.city,
-        birthday: this.form.birthday
-      }).then(() => {
-        this.showToast('保存成功');
-        setTimeout(() => {
-          history.back();
-        }, 1000);
-      }).catch(err => {
-        console.error(err);
-        let msg = '保存失败';
-        if (err.response && err.response.status === 401) {
-          msg = '请先登录';
-        } else if (err.response && err.response.data && err.response.data.errorMsg) {
-          msg = err.response.data.errorMsg;
-        }
-        this.showToast(msg);
-      }).finally(() => {
-        this.saving = false;
-      });
+        birthday: this.form.birthday || null
+      };
+      
+      axios.put('/user/info', data)
+        .then(() => {
+          this.showToast('保存成功');
+          setTimeout(() => { history.back(); }, 1000);
+        })
+        .catch(err => {
+          console.error(err);
+          let msg = '保存失败';
+          if (err.response) {
+            if (err.response.status === 401) msg = '请先登录';
+            else if (err.response.status === 400) msg = '参数格式错误';
+            else if (err.response.data && err.response.data.errorMsg) msg = err.response.data.errorMsg;
+          }
+          this.showToast(msg);
+        })
+        .finally(() => { this.saving = false; });
     },
-    goBack() {
-      history.back();
-    }
+    goBack() { history.back(); }
   }
 });
 </script>
