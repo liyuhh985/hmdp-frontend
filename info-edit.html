@@ -315,7 +315,7 @@ new Vue({
           data.icon = this.form.icon;
         }
         
-        await axios.put('/user/info', data);
+        await axios.post('/user/info', data);
         
         this.showToast('保存成功');
         setTimeout(() => { history.back(); }, 1000);
