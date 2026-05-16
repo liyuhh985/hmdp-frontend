@@ -13,35 +13,42 @@
     
     /* 顶部 */
     .header {
-      
-      z-index: 100;
-      z-index: 100;
       background: linear-gradient(135deg, #ff6633 0%, #ff9966 100%);
-      padding: 20px 15px 60px;
-      position: relative;
-      z-index: 100;
+      padding: 15px;
+      padding-bottom: 60px;
     }
     .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
     }
-    .back-btn {
+    .back-btn, .setting-btn {
       font-size: 20px;
       color: white;
-      padding: 5px;
+      padding: 8px;
     }
     .setting-wrapper {
       position: relative;
-      z-index: 100;
     }
-    .setting-btn {
-      font-size: 20px;
-      color: white;
-      padding: 5px;
-      
+    .setting-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      overflow: hidden;
+      min-width: 120px;
     }
+    .setting-item {
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .setting-item:last-child { border-bottom: none; }
+    .setting-item.logout { color: #ff4444; }
     
     /* 用户卡片 */
     .user-card {
@@ -50,9 +57,6 @@
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      position: relative;
-      z-index: 100;
-      z-index: 10;
     }
     .user-info {
       display: flex;
@@ -67,9 +71,7 @@
       border: 3px solid #fff;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .user-detail {
-      flex: 1;
-    }
+    .user-detail { flex: 1; }
     .user-name {
       font-size: 18px;
       font-weight: 600;
@@ -84,14 +86,6 @@
       white-space: nowrap;
       max-width: 200px;
     }
-    .edit-btn {
-      padding: 8px 16px;
-      background: linear-gradient(135deg, #ff6633 0%, #ff9966 100%);
-      color: white;
-      border-radius: 20px;
-      font-size: 13px;
-      
-    }
     
     /* 统计 */
     .stats-row {
@@ -101,7 +95,7 @@
       padding: 15px 0;
       border-top: 1px solid #f0f0f0;
     }
-    .stat-item { cursor: pointer; }
+    .stat-item { padding: 0 10px; }
     .stat-num {
       font-size: 20px;
       font-weight: 600;
@@ -131,8 +125,6 @@
       font-size: 14px;
       color: #666;
       position: relative;
-      z-index: 100;
-      
     }
     .tab-item.on {
       color: #ff6633;
@@ -161,7 +153,6 @@
       border-radius: 8px;
       margin-bottom: 10px;
       overflow: hidden;
-      
     }
     .note-img {
       width: 80px;
@@ -203,7 +194,7 @@
       display: block;
     }
     
-    /* 退出弹窗 */
+    /* 弹窗 */
     .popup-mask {
       position: fixed;
       top: 0;
@@ -211,7 +202,7 @@
       right: 0;
       bottom: 0;
       background: rgba(0,0,0,0.5);
-      z-index: 1000;
+      z-index: 2000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -243,7 +234,6 @@
       padding: 10px;
       border-radius: 8px;
       font-size: 14px;
-      
     }
     .popup-btn.cancel {
       background: #f5f5f5;
@@ -253,29 +243,6 @@
       background: #ff4444;
       color: white;
     }
-    
-    /* 设置菜单 */
-    .setting-menu {
-      position: absolute;
-      top: 50px;
-      right: 10px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-      z-index: 200;
-      overflow: hidden;
-    }
-    .setting-menu.show { display: block; }
-    .setting-item {
-      padding: 12px 20px;
-      font-size: 14px;
-      color: #333;
-      cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .setting-item:last-child { border-bottom: none; }
-    .setting-item:hover { background: #f9f9f9; }
-    .setting-item.logout { color: #ff4444; }
   </style>
 </head>
 <body>
@@ -284,9 +251,9 @@
   <div class="header">
     <div class="header-top">
       <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
-      <div class="setting-wrapper">
-        <div class="setting-btn" @click="showSetting = !showSetting"><i class="el-icon-more"></i></div>
-        <div class="setting-menu" v-show="showSetting" @click.stop>
+      <div class="setting-wrapper" v-click-outside="closeSetting">
+        <div class="setting-btn" @click.stop="showSetting = !showSetting"><i class="el-icon-more"></i></div>
+        <div class="setting-menu" v-show="showSetting">
           <div class="setting-item" @click="toEdit">编辑资料</div>
           <div class="setting-item logout" @click="showLogout = true; showSetting = false">退出登录</div>
         </div>
@@ -310,11 +277,11 @@
         <div class="stat-num">{{blogs.length}}</div>
         <div class="stat-label">笔记</div>
       </div>
-      <div class="stat-item" @click="toFollowList('follow')">
+      <div class="stat-item">
         <div class="stat-num">{{followCount}}</div>
         <div class="stat-label">关注</div>
       </div>
-      <div class="stat-item" @click="toFollowList('fans')">
+      <div class="stat-item">
         <div class="stat-num">{{fansCount}}</div>
         <div class="stat-label">粉丝</div>
       </div>
@@ -383,6 +350,21 @@
 <script src="./js/common.js"></script>
 <script src="./js/footer.js"></script>
 <script>
+// 点击外部关闭菜单的指令
+Vue.directive('click-outside', {
+  bind: function(el, binding, vnode) {
+    el.clickOutsideEvent = function(event) {
+      if (!(el == event.target || el.contains(event.target))) {
+        vnode.context[binding.expression]();
+      }
+    };
+    document.body.addEventListener('click', el.clickOutsideEvent);
+  },
+  unbind: function(el) {
+    document.body.removeEventListener('click', el.clickOutsideEvent);
+  }
+});
+
 new Vue({
   el: '#app',
   data: {
@@ -422,7 +404,6 @@ new Vue({
         .then(({data}) => { this.blogs = data || []; });
     },
     loadFollowCount() {
-      // 获取关注数和粉丝数
       axios.get('/follow/count/' + this.user.id)
         .then(({data}) => {
           if (data) {
@@ -430,7 +411,6 @@ new Vue({
             this.fansCount = data.fansCount || 0;
           }
         }).catch(() => {
-          // 接口不存在时显示0
           this.followCount = 0;
           this.fansCount = 0;
         });
@@ -453,6 +433,9 @@ new Vue({
         }
       });
     },
+    closeSetting() {
+      this.showSetting = false;
+    },
     goBack() { history.back(); },
     toEdit() { 
       this.showSetting = false;
@@ -464,11 +447,7 @@ new Vue({
         location.href = '/';
       });
     },
-    toBlog(id) { location.href = '/blog-detail.html?id=' + id; },
-    toFollowList(type) {
-      // TODO: 跳转到关注/粉丝列表页
-      console.log('跳转到' + (type === 'follow' ? '关注' : '粉丝') + '列表');
-    }
+    toBlog(id) { location.href = '/blog-detail.html?id=' + id; }
   },
   watch: {
     activeTab(val) {
@@ -476,12 +455,6 @@ new Vue({
         this.loadFollowBlogs();
       }
     }
-  },
-  mounted() {
-    // 点击其他地方关闭设置菜单
-    document.addEventListener('click', () => {
-      this.showSetting = false;
-    });
   }
 });
 </script>
