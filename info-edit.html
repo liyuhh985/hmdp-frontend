@@ -80,11 +80,18 @@
     .form-item:last-child {
       border-bottom: none;
     }
+    .form-item.textarea-item {
+      align-items: flex-start;
+    }
     .form-label {
       width: 80px;
       font-size: 14px;
       color: #333;
       flex-shrink: 0;
+      padding-top: 2px;
+    }
+    .form-label.bold {
+      font-weight: 600;
     }
     .form-input {
       flex: 1;
@@ -110,6 +117,7 @@
       text-align: right;
       background: transparent;
       line-height: 1.5;
+      font-weight: 500;
     }
     .form-textarea::placeholder {
       color: #ccc;
@@ -127,6 +135,25 @@
     .arrow-icon {
       color: #ccc;
       font-size: 12px;
+    }
+    
+    /* Element UI 日期选择器样式覆盖 */
+    .el-date-editor.el-input {
+      width: 150px;
+    }
+    .el-input__inner {
+      border: none !important;
+      text-align: right !important;
+      padding-right: 0 !important;
+      background: transparent !important;
+      font-size: 14px !important;
+      color: #333 !important;
+    }
+    .el-input__prefix {
+      display: none !important;
+    }
+    .el-input__suffix {
+      right: 0 !important;
     }
     
     /* 性别选择弹窗 */
@@ -207,11 +234,11 @@
   <!-- 基本信息表单 -->
   <div class="form-section">
     <div class="form-item">
-      <div class="form-label">昵称</div>
+      <div class="form-label bold">昵称</div>
       <input class="form-input" type="text" v-model.trim="form.nickName" placeholder="请输入昵称" maxlength="20">
     </div>
-    <div class="form-item">
-      <div class="form-label">个人介绍</div>
+    <div class="form-item textarea-item">
+      <div class="form-label bold">个人介绍</div>
       <textarea class="form-textarea" v-model.trim="form.introduce" placeholder="介绍一下自己吧" maxlength="100" rows="2"></textarea>
     </div>
   </div>
@@ -230,8 +257,16 @@
       <input class="form-input" type="text" v-model.trim="form.city" placeholder="请输入城市">
     </div>
     <div class="form-item">
-      <div class="form-label">生日</div>
-      <input class="form-input" type="date" v-model="form.birthday">
+      <div class="form-label">出生年月</div>
+      <el-date-picker
+        v-model="form.birthday"
+        type="month"
+        placeholder="请选择年月"
+        format="yyyy年MM月"
+        value-format="yyyy-MM"
+        :picker-options="pickerOptions"
+        @change="handleBirthdayChange">
+      </el-date-picker>
     </div>
   </div>
   
@@ -270,7 +305,12 @@ new Vue({
     showGenderPicker: false,
     saving: false,
     toastShow: false,
-    toastMsg: ''
+    toastMsg: '',
+    pickerOptions: {
+      disabledDate(time) {
+        return time.getTime() > Date.now();
+      }
+    }
   },
   created() {
     this.loadUser();
@@ -293,13 +333,21 @@ new Vue({
             this.form.introduce = data.introduce || '';
             this.form.gender = data.gender || '';
             this.form.city = data.city || '';
-            this.form.birthday = data.birthday || '';
+            // 如果生日格式是 yyyy-MM-dd，截取前7位变成 yyyy-MM
+            if (data.birthday && data.birthday.length >= 7) {
+              this.form.birthday = data.birthday.substring(0, 7);
+            } else {
+              this.form.birthday = data.birthday || '';
+            }
           }
         });
     },
     selectGender(gender) {
       this.form.gender = gender;
       this.showGenderPicker = false;
+    },
+    handleBirthdayChange(val) {
+      this.form.birthday = val;
     },
     showToast(msg) {
       this.toastMsg = msg;
@@ -331,7 +379,13 @@ new Vue({
         }, 1000);
       }).catch(err => {
         console.error(err);
-        this.showToast('保存失败，请重试');
+        let msg = '保存失败';
+        if (err.response && err.response.status === 401) {
+          msg = '请先登录';
+        } else if (err.response && err.response.data && err.response.data.errorMsg) {
+          msg = err.response.data.errorMsg;
+        }
+        this.showToast(msg);
       }).finally(() => {
         this.saving = false;
       });
