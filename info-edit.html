@@ -7,10 +7,11 @@
   <link rel="stylesheet" href="./css/element.css">
   <link href="./css/main.css" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html { font-size: 12px; }
-    body { background: #f5f5f5; font-family: -apple-system, "PingFang SC", sans-serif; min-height: 100vh; padding-bottom: 60px; }
+    body { background: #f5f5f5; font-family: -apple-system, "PingFang SC", sans-serif; padding-bottom: 20px; }
     
+    /* 顶部导航 */
     .header {
       background: white;
       padding: 15px;
@@ -19,7 +20,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      border-bottom: 1px solid #f0f0f0;
     }
     .back-btn {
       font-size: 20px;
@@ -34,14 +35,13 @@
       color: #333;
     }
     .save-btn {
-      padding: 6px 14px;
-      background: linear-gradient(135deg, #ff6633 0%, #ff9966 100%);
+      padding: 8px 16px;
+      background: #ff6633;
       color: white;
-      border-radius: 16px;
+      border-radius: 20px;
       font-size: 13px;
-      cursor: pointer;
     }
-    .save-btn.disabled {
+    .save-btn.saving {
       background: #ccc;
     }
     
@@ -52,30 +52,12 @@
       text-align: center;
       margin-bottom: 10px;
     }
-    .avatar-wrapper {
-      position: relative;
-      display: inline-block;
-    }
     .avatar-img {
       width: 80px;
       height: 80px;
       border-radius: 50%;
       object-fit: cover;
       border: 3px solid #ff6633;
-    }
-    .avatar-edit {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      width: 24px;
-      height: 24px;
-      background: #ff6633;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 12px;
     }
     .avatar-tip {
       margin-top: 10px;
@@ -93,6 +75,7 @@
       align-items: center;
       padding: 15px;
       border-bottom: 1px solid #f0f0f0;
+      min-height: 54px;
     }
     .form-item:last-child {
       border-bottom: none;
@@ -110,9 +93,11 @@
       font-size: 14px;
       color: #333;
       text-align: right;
+      background: transparent;
+      min-height: 24px;
     }
     .form-input::placeholder {
-      color: #999;
+      color: #ccc;
     }
     .form-textarea {
       flex: 1;
@@ -121,8 +106,13 @@
       font-size: 14px;
       color: #333;
       resize: none;
-      min-height: 60px;
+      min-height: 40px;
       text-align: right;
+      background: transparent;
+      line-height: 1.5;
+    }
+    .form-textarea::placeholder {
+      color: #ccc;
     }
     .form-value {
       flex: 1;
@@ -132,22 +122,11 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-    }
-    .form-value input[type="radio"] {
-      margin-right: 5px;
-    }
-    .gender-options {
-      display: flex;
-      gap: 20px;
-    }
-    .gender-option {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
+      gap: 5px;
     }
     .arrow-icon {
       color: #ccc;
-      margin-left: 5px;
+      font-size: 12px;
     }
     
     /* 性别选择弹窗 */
@@ -161,13 +140,11 @@
       z-index: 1000;
       display: flex;
       align-items: flex-end;
-      justify-content: center;
     }
     .popup-box {
       background: white;
       border-radius: 12px 12px 0 0;
       width: 100%;
-      max-height: 50vh;
     }
     .popup-title {
       padding: 15px;
@@ -176,15 +153,11 @@
       font-weight: 600;
       border-bottom: 1px solid #f0f0f0;
     }
-    .popup-options {
-      padding: 10px 0;
-    }
     .popup-option {
       padding: 15px;
       text-align: center;
       font-size: 15px;
       color: #333;
-      cursor: pointer;
       border-bottom: 1px solid #f0f0f0;
     }
     .popup-option:last-child {
@@ -201,7 +174,7 @@
       background: #f9f9f9;
     }
     
-    /* Toast 提示 */
+    /* Toast */
     .toast {
       position: fixed;
       top: 50%;
@@ -209,7 +182,7 @@
       transform: translate(-50%, -50%);
       background: rgba(0,0,0,0.7);
       color: white;
-      padding: 10px 20px;
+      padding: 12px 24px;
       border-radius: 8px;
       font-size: 14px;
       z-index: 2000;
@@ -222,27 +195,24 @@
   <div class="header">
     <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
     <div class="header-title">编辑资料</div>
-    <div class="save-btn" :class="{disabled: saving}" @click="saveInfo">{{saving ? '保存中...' : '保存'}}</div>
+    <div class="save-btn" :class="{saving: saving}" @click="saveInfo">{{saving ? '保存中' : '保存'}}</div>
   </div>
   
   <!-- 头像 -->
   <div class="avatar-section">
-    <div class="avatar-wrapper">
-      <img class="avatar-img" :src="form.icon || '/imgs/icons/default-icon.png'" alt="">
-      <div class="avatar-edit"><i class="el-icon-camera"></i></div>
-    </div>
-    <div class="avatar-tip">点击更换头像</div>
+    <img class="avatar-img" :src="form.icon || '/imgs/icons/default-icon.png'" alt="">
+    <div class="avatar-tip">点击更换头像（暂不支持）</div>
   </div>
   
   <!-- 基本信息表单 -->
   <div class="form-section">
     <div class="form-item">
       <div class="form-label">昵称</div>
-      <input class="form-input" v-model="form.nickName" placeholder="请输入昵称" maxlength="20">
+      <input class="form-input" type="text" v-model.trim="form.nickName" placeholder="请输入昵称" maxlength="20">
     </div>
     <div class="form-item">
       <div class="form-label">个人介绍</div>
-      <textarea class="form-textarea" v-model="form.introduce" placeholder="介绍一下自己吧" maxlength="100"></textarea>
+      <textarea class="form-textarea" v-model.trim="form.introduce" placeholder="介绍一下自己吧" maxlength="100" rows="2"></textarea>
     </div>
   </div>
   
@@ -257,11 +227,11 @@
     </div>
     <div class="form-item">
       <div class="form-label">城市</div>
-      <input class="form-input" v-model="form.city" placeholder="请输入城市">
+      <input class="form-input" type="text" v-model.trim="form.city" placeholder="请输入城市">
     </div>
     <div class="form-item">
       <div class="form-label">生日</div>
-      <input class="form-input" type="date" v-model="form.birthday" placeholder="请选择生日">
+      <input class="form-input" type="date" v-model="form.birthday">
     </div>
   </div>
   
@@ -269,11 +239,9 @@
   <div class="popup-mask" v-if="showGenderPicker" @click.self="showGenderPicker = false">
     <div class="popup-box">
       <div class="popup-title">选择性别</div>
-      <div class="popup-options">
-        <div class="popup-option" :class="{selected: form.gender === '男'}" @click="selectGender('男')">男</div>
-        <div class="popup-option" :class="{selected: form.gender === '女'}" @click="selectGender('女')">女</div>
-        <div class="popup-option" :class="{selected: form.gender === '保密'}" @click="selectGender('保密')">保密</div>
-      </div>
+      <div class="popup-option" :class="{selected: form.gender === '男'}" @click="selectGender('男')">男</div>
+      <div class="popup-option" :class="{selected: form.gender === '女'}" @click="selectGender('女')">女</div>
+      <div class="popup-option" :class="{selected: form.gender === '保密'}" @click="selectGender('保密')">保密</div>
       <div class="popup-cancel" @click="showGenderPicker = false">取消</div>
     </div>
   </div>
@@ -343,15 +311,13 @@ new Vue({
     saveInfo() {
       if (this.saving) return;
       
-      // 验证
-      if (!this.form.nickName.trim()) {
+      if (!this.form.nickName) {
         this.showToast('请输入昵称');
         return;
       }
       
       this.saving = true;
       
-      // 调用后端接口保存
       axios.put('/user/info', {
         nickName: this.form.nickName,
         introduce: this.form.introduce,
@@ -364,7 +330,8 @@ new Vue({
           history.back();
         }, 1000);
       }).catch(err => {
-        this.showToast('保存失败：' + (err.response?.data?.errorMsg || '未知错误'));
+        console.error(err);
+        this.showToast('保存失败，请重试');
       }).finally(() => {
         this.saving = false;
       });
