@@ -7,15 +7,19 @@
   <link rel="stylesheet" href="./css/element.css">
   <link href="./css/main.css" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html { font-size: 12px; }
     body { background: #f5f5f5; font-family: -apple-system, "PingFang SC", sans-serif; padding-bottom: 60px; }
     
     /* 顶部 */
     .header {
+      
+      z-index: 100;
+      z-index: 100;
       background: linear-gradient(135deg, #ff6633 0%, #ff9966 100%);
       padding: 20px 15px 60px;
       position: relative;
+      z-index: 100;
     }
     .header-top {
       display: flex;
@@ -30,12 +34,13 @@
     }
     .setting-wrapper {
       position: relative;
+      z-index: 100;
     }
     .setting-btn {
       font-size: 20px;
       color: white;
       padding: 5px;
-      cursor: pointer;
+      
     }
     
     /* 用户卡片 */
@@ -46,6 +51,7 @@
       padding: 20px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
       position: relative;
+      z-index: 100;
       z-index: 10;
     }
     .user-info {
@@ -84,7 +90,7 @@
       color: white;
       border-radius: 20px;
       font-size: 13px;
-      cursor: pointer;
+      
     }
     
     /* 统计 */
@@ -125,7 +131,8 @@
       font-size: 14px;
       color: #666;
       position: relative;
-      cursor: pointer;
+      z-index: 100;
+      
     }
     .tab-item.on {
       color: #ff6633;
@@ -154,7 +161,7 @@
       border-radius: 8px;
       margin-bottom: 10px;
       overflow: hidden;
-      cursor: pointer;
+      
     }
     .note-img {
       width: 80px;
@@ -236,7 +243,7 @@
       padding: 10px;
       border-radius: 8px;
       font-size: 14px;
-      cursor: pointer;
+      
     }
     .popup-btn.cancel {
       background: #f5f5f5;
@@ -255,9 +262,8 @@
       background: white;
       border-radius: 8px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-      z-index: 100;
+      z-index: 200;
       overflow: hidden;
-      display: none;
     }
     .setting-menu.show { display: block; }
     .setting-item {
