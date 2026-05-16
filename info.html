@@ -28,10 +28,14 @@
       color: white;
       padding: 5px;
     }
+    .setting-wrapper {
+      position: relative;
+    }
     .setting-btn {
       font-size: 20px;
       color: white;
       padding: 5px;
+      cursor: pointer;
     }
     
     /* 用户卡片 */
@@ -274,9 +278,9 @@
   <div class="header">
     <div class="header-top">
       <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
-      <div style="position: relative;">
+      <div class="setting-wrapper">
         <div class="setting-btn" @click="showSetting = !showSetting"><i class="el-icon-more"></i></div>
-        <div class="setting-menu" :class="{show: showSetting}" @click.stop>
+        <div class="setting-menu" v-show="showSetting" @click.stop>
           <div class="setting-item" @click="toEdit">编辑资料</div>
           <div class="setting-item logout" @click="showLogout = true; showSetting = false">退出登录</div>
         </div>
