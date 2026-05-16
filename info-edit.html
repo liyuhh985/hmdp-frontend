@@ -26,9 +26,37 @@
     .save-btn { padding: 8px 16px; background: #ff6633; color: white; border-radius: 20px; font-size: 13px; }
     .save-btn.saving { background: #ccc; }
     
-    .avatar-section { background: white; padding: 30px; text-align: center; margin-bottom: 10px; }
+    .avatar-section { background: white; padding: 30px; text-align: center; margin-bottom: 10px; position: relative; }
+    .avatar-wrapper { position: relative; display: inline-block; cursor: pointer; }
     .avatar-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #ff6633; }
+    .avatar-edit-icon {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 24px;
+      height: 24px;
+      background: #ff6633;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+    }
     .avatar-tip { margin-top: 10px; font-size: 12px; color: #999; }
+    .avatar-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #avatar-input { display: none; }
     
     .form-section { background: white; margin-bottom: 10px; }
     .form-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #f0f0f0; min-height: 54px; }
@@ -68,8 +96,15 @@
   </div>
   
   <div class="avatar-section">
-    <img class="avatar-img" :src="form.icon || '/imgs/icons/default-icon.png'" alt="">
-    <div class="avatar-tip">点击更换头像（暂不支持）</div>
+    <div class="avatar-wrapper" @click="selectAvatar">
+      <img class="avatar-img" :src="previewAvatar || form.icon || '/imgs/icons/default-icon.png'" alt="">
+      <div class="avatar-edit-icon"><i class="el-icon-camera"></i></div>
+      <div class="avatar-loading" v-if="uploadingAvatar">
+        <i class="el-icon-loading"></i>
+      </div>
+    </div>
+    <div class="avatar-tip">点击更换头像</div>
+    <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" ref="avatarInput">
   </div>
   
   <div class="form-section">
@@ -142,6 +177,9 @@ new Vue({
     saving: false,
     toastShow: false,
     toastMsg: '',
+    previewAvatar: null,
+    uploadingAvatar: false,
+    avatarFile: null,
     pickerOptions: {
       disabledDate(time) {
         return time.getTime() > Date.now();
@@ -177,7 +215,6 @@ new Vue({
             this.form.gender = data.gender;
             this.form.city = data.city || '';
             if (data.birthday) {
-              // LocalDate 格式: yyyy-MM-dd，转成 yyyy-MM-01
               this.form.birthday = data.birthday.substring(0, 7) + '-01';
             }
           }
@@ -187,12 +224,64 @@ new Vue({
       this.form.gender = val;
       this.showGenderPicker = false;
     },
+    selectAvatar() {
+      this.$refs.avatarInput.click();
+    },
+    handleAvatarChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // 检查文件类型
+      if (!file.type.startsWith('image/')) {
+        this.showToast('请选择图片文件');
+        return;
+      }
+      
+      // 检查文件大小（最大 2MB）
+      if (file.size > 2 * 1024 * 1024) {
+        this.showToast('图片大小不能超过2MB');
+        return;
+      }
+      
+      // 预览图片
+      this.previewAvatar = URL.createObjectURL(file);
+      this.avatarFile = file;
+    },
+    uploadAvatar() {
+      return new Promise((resolve, reject) => {
+        if (!this.avatarFile) {
+          resolve(null);
+          return;
+        }
+        
+        this.uploadingAvatar = true;
+        const formData = new FormData();
+        formData.append('file', this.avatarFile);
+        
+        axios.post('/user/avatar', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
+        .then(({data}) => {
+          this.form.icon = data;
+          this.previewAvatar = null;
+          this.avatarFile = null;
+          resolve(data);
+        })
+        .catch(err => {
+          this.showToast('头像上传失败');
+          reject(err);
+        })
+        .finally(() => {
+          this.uploadingAvatar = false;
+        });
+      });
+    },
     showToast(msg) {
       this.toastMsg = msg;
       this.toastShow = true;
       setTimeout(() => { this.toastShow = false; }, 2000);
     },
-    saveInfo() {
+    async saveInfo() {
       if (this.saving) return;
       if (!this.form.nickName) {
         this.showToast('请输入昵称');
@@ -201,31 +290,37 @@ new Vue({
       
       this.saving = true;
       
-      // 发送数据，gender 转成布尔值，birthday 保持 yyyy-MM-dd 格式
-      const data = {
-        nickName: this.form.nickName,
-        introduce: this.form.introduce,
-        gender: this.form.gender,
-        city: this.form.city,
-        birthday: this.form.birthday || null
-      };
-      
-      axios.put('/user/info', data)
-        .then(() => {
-          this.showToast('保存成功');
-          setTimeout(() => { history.back(); }, 1000);
-        })
-        .catch(err => {
-          console.error(err);
-          let msg = '保存失败';
-          if (err.response) {
-            if (err.response.status === 401) msg = '请先登录';
-            else if (err.response.status === 400) msg = '参数格式错误';
-            else if (err.response.data && err.response.data.errorMsg) msg = err.response.data.errorMsg;
-          }
-          this.showToast(msg);
-        })
-        .finally(() => { this.saving = false; });
+      try {
+        // 先上传头像
+        if (this.avatarFile) {
+          await this.uploadAvatar();
+        }
+        
+        // 再保存其他信息
+        const data = {
+          nickName: this.form.nickName,
+          introduce: this.form.introduce,
+          gender: this.form.gender,
+          city: this.form.city,
+          birthday: this.form.birthday || null
+        };
+        
+        await axios.put('/user/info', data);
+        
+        this.showToast('保存成功');
+        setTimeout(() => { history.back(); }, 1000);
+      } catch (err) {
+        console.error(err);
+        let msg = '保存失败';
+        if (err.response) {
+          if (err.response.status === 401) msg = '请先登录';
+          else if (err.response.status === 400) msg = '参数格式错误';
+          else if (err.response.data && err.response.data.errorMsg) msg = err.response.data.errorMsg;
+        }
+        this.showToast(msg);
+      } finally {
+        this.saving = false;
+      }
     },
     goBack() { history.back(); }
   }
