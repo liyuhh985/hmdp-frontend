@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>AI 智能助手 - 黑马点评</title>
+  <link rel="stylesheet" href="./css/element.css">
+  <link rel="stylesheet" href="./css/main.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 12px; }
+    body { 
+      background: linear-gradient(180deg, #f8f8f8 0%, #f2f2f2 100%); 
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* 顶部导航 */
+    .chat-header {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      padding: 12px 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(255, 107, 53, 0.2);
+    }
+    .header-back {
+      color: white;
+      font-size: 20px;
+      padding: 8px;
+      cursor: pointer;
+    }
+    .header-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .header-clear {
+      color: white;
+      font-size: 12px;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 15px;
+      cursor: pointer;
+    }
+    
+    /* 对话区域 */
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      padding-bottom: 80px;
+    }
+    
+    /* 消息气泡 */
+    .message {
+      display: flex;
+      margin-bottom: 15px;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .message.user { justify-content: flex-end; }
+    .message.ai { justify-content: flex-start; }
+    
+    .message-content {
+      max-width: 75%;
+      padding: 12px 15px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .message.user .message-content {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      color: white;
+      border-bottom-right-radius: 6px;
+    }
+    .message.ai .message-content {
+      background: white;
+      color: #333;
+      border-bottom-left-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    
+    /* AI 头像 */
+    .ai-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .ai-avatar i { color: white; font-size: 18px; }
+    
+    /* 打字光标 */
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 16px;
+      background: #ff6b35;
+      margin-left: 2px;
+      animation: blink 1s infinite;
+      vertical-align: middle;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    
+    /* 底部输入 */
+    .chat-input-area {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 10px 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+      z-index: 100;
+    }
+    .chat-input {
+      flex: 1;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 15px;
+      font-size: 14px;
+      outline: none;
+      resize: none;
+      max-height: 80px;
+      line-height: 1.4;
+    }
+    .chat-input:focus { background: #fff; box-shadow: 0 0 0 2px rgba(255,107,53,0.2); }
+    .send-btn {
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .send-btn:active { transform: scale(0.92); }
+    .send-btn:disabled { 
+      background: #ccc; 
+      cursor: not-allowed; 
+      transform: none;
+    }
+    .send-btn i { font-size: 18px; }
+    
+    /* 快捷提示 */
+    .quick-tips {
+      padding: 10px 15px;
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .quick-tips-title {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    .quick-tip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .quick-tip {
+      background: #fff6f0;
+      color: #ff6b35;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid rgba(255,107,53,0.2);
+    }
+    .quick-tip:active { background: #ffebe0; }
+    
+    /* 欢迎消息 */
+    .welcome-message {
+      text-align: center;
+      padding: 30px 20px;
+    }
+    .welcome-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+    }
+    .welcome-icon i { color: white; font-size: 28px; }
+    .welcome-title { font-size: 16px; color: #333; font-weight: 600; }
+    .welcome-desc { font-size: 13px; color: #999; margin-top: 8px; }
+    
+    /* 加载动画 */
+    .loading-dots {
+      display: flex;
+      gap: 4px;
+      padding: 5px 0;
+    }
+    .loading-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ff6b35;
+      animation: dotBounce 1.4s infinite ease-in-out both;
+    }
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes dotBounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- 顶部导航 -->
+  <div class="chat-header">
+    <div class="header-back" @click="goBack">
+      <i class="el-icon-arrow-left"></i>
+    </div>
+    <div class="header-title">AI 智能助手</div>
+    <div class="header-clear" @click="clearChat" v-if="messages.length > 0">清空</div>
+    <div v-else style="width: 60px;"></div>
+  </div>
+  
+  <!-- 快捷提示（首次进入） -->
+  <div class="quick-tips" v-if="messages.length === 0">
+    <div class="quick-tips-title">你可以问我：</div>
+    <div class="quick-tip-list">
+      <div class="quick-tip" @click="sendQuickTip('推荐附近好吃的火锅店')">推荐附近好吃的火锅店</div>
+      <div class="quick-tip" @click="sendQuickTip('帮我写一篇探店笔记')">帮我写一篇探店笔记</div>
+      <div class="quick-tip" @click="sendQuickTip('这家店有什么优惠活动？')">这家店有什么优惠活动？</div>
+      <div class="quick-tip" @click="sendQuickTip('附近有什么好玩的地方？')">附近有什么好玩的地方？</div>
+    </div>
+  </div>
+  
+  <!-- 对话区域 -->
+  <div class="chat-container" ref="chatContainer">
+    <!-- 欢迎消息 -->
+    <div class="welcome-message" v-if="messages.length === 0">
+      <div class="welcome-icon"><i class="el-icon-chat-dot-round"></i></div>
+      <div class="welcome-title">你好，我是 AI 助手</div>
+      <div class="welcome-desc">我可以帮你推荐店铺、写笔记、回答问题</div>
+    </div>
+    
+    <!-- 消息列表 -->
+    <div v-for="(msg, index) in messages" :key="index" class="message" :class="msg.role">
+      <!-- AI 头像 -->
+      <div class="ai-avatar" v-if="msg.role === 'ai'">
+        <i class="el-icon-chat-dot-round"></i>
+      </div>
+      
+      <!-- 消息内容 -->
+      <div class="message-content">
+        {{ msg.content }}<span class="typing-cursor" v-if="msg.isTyping"></span>
+      </div>
+    </div>
+    
+    <!-- AI 正在输入 -->
+    <div class="message ai" v-if="isLoading && !currentTypingMsg">
+      <div class="ai-avatar"><i class="el-icon-chat-dot-round"></i></div>
+      <div class="message-content">
+        <div class="loading-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 底部输入 -->
+  <div class="chat-input-area">
+    <textarea 
+      class="chat-input" 
+      v-model="inputText" 
+      @keyup.enter="handleEnter"
+      placeholder="输入你的问题..."
+      rows="1"
+      :disabled="isLoading"
+    ></textarea>
+    <button class="send-btn" @click="sendMessage" :disabled="!inputText.trim() || isLoading">
+      <i class="el-icon-s-promotion"></i>
+    </button>
+  </div>
+</div>
+
+<script src="./js/vue.js"></script>
+<script src="./js/axios.min.js"></script>
+<script src="./js/element.js"></script>
+<script src="./js/common.js"></script>
+<script>
+new Vue({
+  el: '#app',
+  data: {
+    messages: [],           // 消息列表
+    inputText: '',          // 输入内容
+    isLoading: false,       // 是否正在加载
+    currentTypingMsg: null, // 当前正在打字的消息
+    eventSource: null       // SSE 连接
+  },
+  methods: {
+    // 返回上一页
+    goBack() {
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+      history.back();
+    },
+    
+    // 清空对话
+    clearChat() {
+      this.$confirm('确定要清空所有对话记录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.messages = [];
+        this.$message.success('已清空');
+      }).catch(() => {});
+    },
+    
+    // 快捷提示点击
+    sendQuickTip(text) {
+      this.inputText = text;
+      this.sendMessage();
+    },
+    
+    // 回车发送
+    handleEnter(e) {
+      if (!e.shiftKey) {
+        e.preventDefault();
+        this.sendMessage();
+      }
+    },
+    
+    // 发送消息
+    async sendMessage() {
+      const text = this.inputText.trim();
+      if (!text || this.isLoading) return;
+      
+      // 添加用户消息
+      this.messages.push({
+        role: 'user',
+        content: text
+      });
+      this.inputText = '';
+      this.scrollToBottom();
+      
+      // 开始加载
+      this.isLoading = true;
+      
+      try {
+        // 方案1：调用真实后端 SSE 接口（后端准备好后启用）
+        // await this.callRealBackend(text);
+        
+        // 方案2：模拟 SSE 流式输出（演示用）
+        await this.mockSSE(text);
+        
+      } catch (error) {
+        console.error('发送失败:', error);
+        this.messages.push({
+          role: 'ai',
+          content: '抱歉，出了点问题，请稍后再试...'
+        });
+      } finally {
+        this.isLoading = false;
+        this.scrollToBottom();
+      }
+    },
+    
+    // 真实后端 SSE 调用（后端准备好后启用）
+    async callRealBackend(text) {
+      // 添加 AI 消息占位
+      const aiMsgIndex = this.messages.length;
+      this.messages.push({
+        role: 'ai',
+        content: '',
+        isTyping: true
+      });
+      this.currentTypingMsg = aiMsgIndex;
+      
+      // 使用 fetch + ReadableStream 处理 SSE（支持 POST）
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        // 解析 SSE 格式: data: 内容\n\n
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const content = line.slice(6);
+            if (content === '[DONE]') {
+              // 结束标记
+              this.messages[aiMsgIndex].isTyping = false;
+              this.currentTypingMsg = null;
+            } else {
+              // 追加内容
+              this.messages[aiMsgIndex].content += content;
+              this.scrollToBottom();
+            }
+          }
+        }
+      }
+    },
+    
+    // 模拟 SSE 流式输出（演示用）
+    async mockSSE(userText) {
+      // 模拟 AI 回复内容
+      let aiResponse = '';
+      
+      if (userText.includes('火锅') || userText.includes('推荐')) {
+        aiResponse = `好的，我来帮你推荐几家附近的火锅店：
+
+1. 海底捞火锅（万达店）
+   人均：120元 | 评分：4.8
+   特色：服务好、菜品新鲜
+   
+2. 小龙坎老火锅
+   人均：85元 | 评分：4.6
+   特色：川味正宗、性价比高
+   
+3. 呷哺呷哺
+   人均：60元 | 评分：4.5
+   特色：一人一锅、快捷方便
+
+需要查看具体位置或优惠券吗？`;
+      } else if (userText.includes('笔记') || userText.includes('写')) {
+        aiResponse = `好的，我来帮你写一篇探店笔记：
+
+【探店】发现一家宝藏火锅店！
+
+今天和朋友来打卡了这家超火的火锅店，果然没让我失望！
+
+🏠 环境：装修很有格调，干净明亮
+🍲 味道：汤底鲜美，食材新鲜
+💰 价格：人均80左右，性价比不错
+⭐ 推荐指数：★★★★★
+
+强烈推荐他们家的毛肚和虾滑，口感超棒！
+
+需要修改或补充什么内容吗？`;
+      } else if (userText.includes('优惠') || userText.includes('活动')) {
+        aiResponse = `目前店铺有以下优惠活动：
+
+1. 新用户立减20元
+2. 满100减15元优惠券
+3. 周三会员日全场8.8折
+4. 分享好友各得10元红包
+
+需要我帮你领取优惠券吗？`;
+      } else {
+        aiResponse = `收到你的问题："${userText}"
+
+我可以帮你：
+- 推荐附近的店铺
+- 写探店笔记
+- 查询优惠活动
+- 回答美食相关问题
+
+请问有什么可以帮到你的？`;
+      }
+      
+      // 添加 AI 消息占位
+      const aiMsgIndex = this.messages.length;
+      this.messages.push({
+        role: 'ai',
+        content: '',
+        isTyping: true
+      });
+      this.currentTypingMsg = aiMsgIndex;
+      
+      // 模拟逐字输出
+      for (let i = 0; i < aiResponse.length; i++) {
+        await this.sleep(30 + Math.random() * 20); // 30-50ms 随机延迟
+        this.messages[aiMsgIndex].content += aiResponse[i];
+        this.scrollToBottom();
+      }
+      
+      // 完成打字
+      this.messages[aiMsgIndex].isTyping = false;
+      this.currentTypingMsg = null;
+    },
+    
+    // 滚动到底部
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = this.$refs.chatContainer;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+    },
+    
+    // 延时函数
+    sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  },
+  mounted() {
+    // 页面加载完成
+    console.log('AI Chat 页面已加载');
+  },
+  beforeDestroy() {
+    // 关闭 SSE 连接
+    if (this.eventSource) {
+      this.eventSource.close();
+    }
+  }
+});
+</script>
+</body>
+</html>
