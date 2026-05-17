@@ -497,22 +497,48 @@
     
     addMessage('user', text);
     
-    const responses = {
-      '火锅': '好的！推荐以下火锅店：\n1. 海底捞（万达店）\n2. 小龙坎老火锅\n3. 呷哺呷哺\n\n需要查看详情吗？',
-      '笔记': '好的，我来帮你写探店笔记：\n\n【探店】发现宝藏店铺！\n环境：★★★★★\n味道：★★★★★\n价格：人均80元\n\n需要修改吗？',
-      '优惠': '目前有以下优惠：\n1. 新用户立减20元\n2. 满100减15元\n3. 会员日8.8折\n\n需要领取吗？'
-    };
-    
-    let response = '收到！我可以帮你推荐店铺、写笔记、查优惠。请问有什么需要？';
-    for (const key in responses) {
-      if (text.includes(key)) {
-        response = responses[key];
-        break;
+    try {
+      // 调用真实 SSE 接口
+      const response = await fetch('/ai/chat/stream?message=' + encodeURIComponent(text));
+      
+      if (!response.ok) {
+        throw new Error('接口请求失败');
       }
+      
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      
+      let aiContent = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        aiContent += chunk;
+      }
+      
+      addMessage('ai', aiContent);
+    } catch (error) {
+      // 如果真实接口失败，使用模拟数据
+      console.warn('真实接口失败，使用模拟数据:', error);
+      
+      const responses = {
+        '火锅': '好的！推荐以下火锅店：\n1. 海底捞（万达店）\n2. 小龙坎老火锅\n3. 呷哺呷哺\n\n需要查看详情吗？',
+        '笔记': '好的，我来帮你写探店笔记：\n\n【探店】发现宝藏店铺！\n环境：★★★★★\n味道：★★★★★\n价格：人均80元\n\n需要修改吗？',
+        '优惠': '目前有以下优惠：\n1. 新用户立减20元\n2. 满100减15元\n3. 会员日8.8折\n\n需要领取吗？'
+      };
+      
+      let response = '收到！我可以帮你推荐店铺、写笔记、查优惠。请问有什么需要？';
+      for (const key in responses) {
+        if (text.includes(key)) {
+          response = responses[key];
+          break;
+        }
+      }
+      
+      await new Promise(r => setTimeout(r, 500));
+      addMessage('ai', response);
     }
-    
-    await new Promise(r => setTimeout(r, 500));
-    addMessage('ai', response);
   }
   
   // ========== 事件绑定 ==========

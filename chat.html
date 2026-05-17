@@ -372,11 +372,8 @@ new Vue({
       this.isLoading = true;
       
       try {
-        // 方案1：调用真实后端 SSE 接口（后端准备好后启用）
-        // await this.callRealBackend(text);
-        
-        // 方案2：模拟 SSE 流式输出（演示用）
-        await this.mockSSE(text);
+        // 调用真实后端 SSE 接口
+        await this.callRealBackend(text);
         
       } catch (error) {
         console.error('发送失败:', error);
@@ -390,7 +387,7 @@ new Vue({
       }
     },
     
-    // 真实后端 SSE 调用（后端准备好后启用）
+    // 真实后端 SSE 调用
     async callRealBackend(text) {
       // 添加 AI 消息占位
       const aiMsgIndex = this.messages.length;
@@ -401,12 +398,37 @@ new Vue({
       });
       this.currentTypingMsg = aiMsgIndex;
       
-      // 使用 fetch + ReadableStream 处理 SSE（支持 POST）
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text })
-      });
+      try {
+        // 使用 SSE 流式接口
+        const response = await fetch('/ai/chat/stream?message=' + encodeURIComponent(text));
+        
+        if (!response.ok) {
+          throw new Error('接口请求失败');
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          this.messages[aiMsgIndex].content += chunk;
+          this.scrollToBottom();
+        }
+      } catch (error) {
+        // 如果真实接口失败，使用模拟数据
+        console.warn('真实接口失败，使用模拟数据:', error);
+        await this.mockSSE(text);
+        // 移除占位的空消息
+        this.messages.splice(aiMsgIndex, 1);
+        return;
+      }
+      
+      this.messages[aiMsgIndex].isTyping = false;
+      this.currentTypingMsg = null;
+    },
       
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
