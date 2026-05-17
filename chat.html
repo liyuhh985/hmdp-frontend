@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <title>AI 智能助手 - 黑马点评</title>
   <link rel="stylesheet" href="./css/element.css">
-  <link rel="stylesheet" href="./css/main.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { font-size: 12px; }
@@ -144,8 +143,12 @@
       resize: none;
       max-height: 80px;
       line-height: 1.4;
+      font-family: inherit;
     }
-    .chat-input:focus { background: #fff; box-shadow: 0 0 0 2px rgba(255,107,53,0.2); }
+    .chat-input:focus { 
+      background: #fff; 
+      box-shadow: 0 0 0 2px rgba(255,107,53,0.2); 
+    }
     .send-btn {
       background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
       color: white;
@@ -158,6 +161,7 @@
       justify-content: center;
       cursor: pointer;
       transition: transform 0.2s;
+      flex-shrink: 0;
     }
     .send-btn:active { transform: scale(0.92); }
     .send-btn:disabled { 
@@ -292,14 +296,14 @@
   
   <!-- 底部输入 -->
   <div class="chat-input-area">
-    <textarea 
+    <input 
+      type="text"
       class="chat-input" 
       v-model="inputText" 
-      @keyup.enter="handleEnter"
+      @keyup.enter="sendMessage"
       placeholder="输入你的问题..."
-      rows="1"
       :disabled="isLoading"
-    ></textarea>
+    />
     <button class="send-btn" @click="sendMessage" :disabled="!inputText.trim() || isLoading">
       <i class="el-icon-s-promotion"></i>
     </button>
@@ -307,29 +311,23 @@
 </div>
 
 <script src="./js/vue.js"></script>
-<script src="./js/axios.min.js"></script>
-<script src="./js/element.js"></script>
-<script src="./js/common.js"></script>
 <script>
+// API 基础地址（本地开发时改为 http://localhost:8081）
+const API_BASE = window.API_BASE_URL || '';
+
 new Vue({
   el: '#app',
   data: {
-    messages: [],           // 消息列表
-    inputText: '',          // 输入内容
-    isLoading: false,       // 是否正在加载
-    currentTypingMsg: null, // 当前正在打字的消息
-    eventSource: null       // SSE 连接
+    messages: [],
+    inputText: '',
+    isLoading: false,
+    currentTypingMsg: null
   },
   methods: {
-    // 返回上一页
     goBack() {
-      if (this.eventSource) {
-        this.eventSource.close();
-      }
       history.back();
     },
     
-    // 清空对话
     clearChat() {
       this.$confirm('确定要清空所有对话记录吗？', '提示', {
         confirmButtonText: '确定',
@@ -341,40 +339,22 @@ new Vue({
       }).catch(() => {});
     },
     
-    // 快捷提示点击
     sendQuickTip(text) {
       this.inputText = text;
       this.sendMessage();
     },
     
-    // 回车发送
-    handleEnter(e) {
-      if (!e.shiftKey) {
-        e.preventDefault();
-        this.sendMessage();
-      }
-    },
-    
-    // 发送消息
     async sendMessage() {
       const text = this.inputText.trim();
       if (!text || this.isLoading) return;
       
-      // 添加用户消息
-      this.messages.push({
-        role: 'user',
-        content: text
-      });
+      this.messages.push({ role: 'user', content: text });
       this.inputText = '';
+      this.isLoading = true;
       this.scrollToBottom();
       
-      // 开始加载
-      this.isLoading = true;
-      
       try {
-        // 调用真实后端 SSE 接口
-        await this.callRealBackend(text);
-        
+        await this.callAI(text);
       } catch (error) {
         console.error('发送失败:', error);
         this.messages.push({
@@ -387,176 +367,45 @@ new Vue({
       }
     },
     
-    // 真实后端 SSE 调用
-    async callRealBackend(text) {
-      // 添加 AI 消息占位
+    async callAI(text) {
       const aiMsgIndex = this.messages.length;
-      this.messages.push({
-        role: 'ai',
-        content: '',
-        isTyping: true
-      });
+      this.messages.push({ role: 'ai', content: '', isTyping: true });
       this.currentTypingMsg = aiMsgIndex;
       
-      try {
-        // 使用 SSE 流式接口
-        const response = await fetch('/ai/chat/stream?message=' + encodeURIComponent(text));
-        
-        if (!response.ok) {
-          throw new Error('接口请求失败');
-        }
-        
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          
-          buffer += decoder.decode(value, { stream: true });
-          
-          // 解析 SSE 格式: data:xxx\n\n
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // 保留不完整的行
-          
-          for (const line of lines) {
-            if (line.startsWith('data:')) {
-              const content = line.slice(5); // 去掉 "data:"
-              if (content.trim()) {
-                this.messages[aiMsgIndex].content += content;
-                this.scrollToBottom();
-              }
-            }
-          }
-        }
-        
-        // 处理剩余的 buffer
-        if (buffer.startsWith('data:')) {
-          const content = buffer.slice(5);
-          if (content.trim()) {
-            this.messages[aiMsgIndex].content += content;
-          }
-        }
-      } catch (error) {
-        // 如果真实接口失败，使用模拟数据
-        console.warn('真实接口失败，使用模拟数据:', error);
-        await this.mockSSE(text);
-        // 移除占位的空消息
-        this.messages.splice(aiMsgIndex, 1);
-        return;
-      }
+      const url = API_BASE + '/ai/chat/stream?message=' + encodeURIComponent(text);
+      const response = await fetch(url);
       
-      this.messages[aiMsgIndex].isTyping = false;
-      this.currentTypingMsg = null;
-    },
+      if (!response.ok) {
+        throw new Error('接口请求失败');
+      }
       
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = '';
       
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value, { stream: true });
-        // 解析 SSE 格式: data: 内容\n\n
-        const lines = chunk.split('\n');
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const content = line.slice(6);
-            if (content === '[DONE]') {
-              // 结束标记
-              this.messages[aiMsgIndex].isTyping = false;
-              this.currentTypingMsg = null;
-            } else {
-              // 追加内容
+          if (line.startsWith('data:')) {
+            const content = line.slice(5);
+            if (content.trim()) {
               this.messages[aiMsgIndex].content += content;
               this.scrollToBottom();
             }
           }
         }
       }
-    },
-    
-    // 模拟 SSE 流式输出（演示用）
-    async mockSSE(userText) {
-      // 模拟 AI 回复内容
-      let aiResponse = '';
       
-      if (userText.includes('火锅') || userText.includes('推荐')) {
-        aiResponse = `好的，我来帮你推荐几家附近的火锅店：
-
-1. 海底捞火锅（万达店）
-   人均：120元 | 评分：4.8
-   特色：服务好、菜品新鲜
-   
-2. 小龙坎老火锅
-   人均：85元 | 评分：4.6
-   特色：川味正宗、性价比高
-   
-3. 呷哺呷哺
-   人均：60元 | 评分：4.5
-   特色：一人一锅、快捷方便
-
-需要查看具体位置或优惠券吗？`;
-      } else if (userText.includes('笔记') || userText.includes('写')) {
-        aiResponse = `好的，我来帮你写一篇探店笔记：
-
-【探店】发现一家宝藏火锅店！
-
-今天和朋友来打卡了这家超火的火锅店，果然没让我失望！
-
-🏠 环境：装修很有格调，干净明亮
-🍲 味道：汤底鲜美，食材新鲜
-💰 价格：人均80左右，性价比不错
-⭐ 推荐指数：★★★★★
-
-强烈推荐他们家的毛肚和虾滑，口感超棒！
-
-需要修改或补充什么内容吗？`;
-      } else if (userText.includes('优惠') || userText.includes('活动')) {
-        aiResponse = `目前店铺有以下优惠活动：
-
-1. 新用户立减20元
-2. 满100减15元优惠券
-3. 周三会员日全场8.8折
-4. 分享好友各得10元红包
-
-需要我帮你领取优惠券吗？`;
-      } else {
-        aiResponse = `收到你的问题："${userText}"
-
-我可以帮你：
-- 推荐附近的店铺
-- 写探店笔记
-- 查询优惠活动
-- 回答美食相关问题
-
-请问有什么可以帮到你的？`;
-      }
-      
-      // 添加 AI 消息占位
-      const aiMsgIndex = this.messages.length;
-      this.messages.push({
-        role: 'ai',
-        content: '',
-        isTyping: true
-      });
-      this.currentTypingMsg = aiMsgIndex;
-      
-      // 模拟逐字输出
-      for (let i = 0; i < aiResponse.length; i++) {
-        await this.sleep(30 + Math.random() * 20); // 30-50ms 随机延迟
-        this.messages[aiMsgIndex].content += aiResponse[i];
-        this.scrollToBottom();
-      }
-      
-      // 完成打字
       this.messages[aiMsgIndex].isTyping = false;
       this.currentTypingMsg = null;
     },
     
-    // 滚动到底部
     scrollToBottom() {
       this.$nextTick(() => {
         const container = this.$refs.chatContainer;
@@ -564,21 +413,6 @@ new Vue({
           container.scrollTop = container.scrollHeight;
         }
       });
-    },
-    
-    // 延时函数
-    sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-  },
-  mounted() {
-    // 页面加载完成
-    console.log('AI Chat 页面已加载');
-  },
-  beforeDestroy() {
-    // 关闭 SSE 连接
-    if (this.eventSource) {
-      this.eventSource.close();
     }
   }
 });

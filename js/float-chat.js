@@ -497,9 +497,12 @@
     
     addMessage('user', text);
     
+    // API 基础地址（本地开发时修改）
+    const API_BASE = window.API_BASE_URL || '';
+    
     try {
-      // 调用真实 SSE 接口
-      const response = await fetch('/ai/chat/stream?message=' + encodeURIComponent(text));
+      const url = API_BASE + '/ai/chat/stream?message=' + encodeURIComponent(text);
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('接口请求失败');
@@ -515,8 +518,6 @@
         if (done) break;
         
         buffer += decoder.decode(value, { stream: true });
-        
-        // 解析 SSE 格式: data:xxx\n\n
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
         
@@ -530,35 +531,10 @@
         }
       }
       
-      // 处理剩余的 buffer
-      if (buffer.startsWith('data:')) {
-        const content = buffer.slice(5);
-        if (content.trim()) {
-          aiContent += content;
-        }
-      }
-      
       addMessage('ai', aiContent);
     } catch (error) {
-      // 如果真实接口失败，使用模拟数据
-      console.warn('真实接口失败，使用模拟数据:', error);
-      
-      const responses = {
-        '火锅': '好的！推荐以下火锅店：\n1. 海底捞（万达店）\n2. 小龙坎老火锅\n3. 呷哺呷哺\n\n需要查看详情吗？',
-        '笔记': '好的，我来帮你写探店笔记：\n\n【探店】发现宝藏店铺！\n环境：★★★★★\n味道：★★★★★\n价格：人均80元\n\n需要修改吗？',
-        '优惠': '目前有以下优惠：\n1. 新用户立减20元\n2. 满100减15元\n3. 会员日8.8折\n\n需要领取吗？'
-      };
-      
-      let response = '收到！我可以帮你推荐店铺、写笔记、查优惠。请问有什么需要？';
-      for (const key in responses) {
-        if (text.includes(key)) {
-          response = responses[key];
-          break;
-        }
-      }
-      
-      await new Promise(r => setTimeout(r, 500));
-      addMessage('ai', response);
+      console.warn('接口失败:', error);
+      addMessage('ai', '抱歉，出了点问题，请检查后端是否启动。');
     }
   }
   
