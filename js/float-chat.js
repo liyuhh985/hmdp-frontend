@@ -507,14 +507,35 @@
       
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      
+      let buffer = '';
       let aiContent = '';
+      
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value, { stream: true });
-        aiContent += chunk;
+        buffer += decoder.decode(value, { stream: true });
+        
+        // 解析 SSE 格式: data:xxx\n\n
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+        
+        for (const line of lines) {
+          if (line.startsWith('data:')) {
+            const content = line.slice(5);
+            if (content.trim()) {
+              aiContent += content;
+            }
+          }
+        }
+      }
+      
+      // 处理剩余的 buffer
+      if (buffer.startsWith('data:')) {
+        const content = buffer.slice(5);
+        if (content.trim()) {
+          aiContent += content;
+        }
       }
       
       addMessage('ai', aiContent);

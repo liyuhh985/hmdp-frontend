@@ -408,14 +408,35 @@ new Vue({
         
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+        let buffer = '';
         
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           
-          const chunk = decoder.decode(value, { stream: true });
-          this.messages[aiMsgIndex].content += chunk;
-          this.scrollToBottom();
+          buffer += decoder.decode(value, { stream: true });
+          
+          // 解析 SSE 格式: data:xxx\n\n
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // 保留不完整的行
+          
+          for (const line of lines) {
+            if (line.startsWith('data:')) {
+              const content = line.slice(5); // 去掉 "data:"
+              if (content.trim()) {
+                this.messages[aiMsgIndex].content += content;
+                this.scrollToBottom();
+              }
+            }
+          }
+        }
+        
+        // 处理剩余的 buffer
+        if (buffer.startsWith('data:')) {
+          const content = buffer.slice(5);
+          if (content.trim()) {
+            this.messages[aiMsgIndex].content += content;
+          }
         }
       } catch (error) {
         // 如果真实接口失败，使用模拟数据
