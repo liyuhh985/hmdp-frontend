@@ -3,134 +3,521 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
-  <!-- 引入样式 -->
+  <title>有鱼点评 - 编辑资料</title>
   <link rel="stylesheet" href="./css/element.css">
   <link href="./css/main.css" rel="stylesheet">
-  <link href="./css/info.css" rel="stylesheet">
-
-  <style type="text/css">
-
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { font-size: 12px; }
+    body { background: linear-gradient(180deg, #f8f9fc 0%, #f0f2f5 100%); font-family: -apple-system, "PingFang SC", sans-serif; padding-bottom: 30px; min-height: 100vh; }
+    
+    /* 顶部导航 */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
+    }
+    .back-btn { font-size: 20px; color: white; padding: 8px; margin-right: 10px; cursor: pointer; border-radius: 50%; transition: all 0.3s; }
+    .back-btn:active { background: rgba(255,255,255,0.2); }
+    .header-title { flex: 1; font-size: 17px; font-weight: 600; color: white; }
+    .save-btn { 
+      padding: 8px 20px; 
+      background: rgba(255,255,255,0.95); 
+      color: #667eea; 
+      border-radius: 20px; 
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .save-btn:active { transform: scale(0.95); }
+    .save-btn.saving { background: #e0e0e0; color: #999; }
+    
+    /* 头像区域 */
+    .avatar-section { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 30px 30px 35px;
+      text-align: center;
+    }
+    .avatar-wrapper { 
+      position: relative; 
+      display: inline-block; 
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .avatar-wrapper:active { transform: scale(0.95); }
+    .avatar-img { 
+      width: 90px; 
+      height: 90px; 
+      border-radius: 50%; 
+      object-fit: cover; 
+      border: 4px solid rgba(255,255,255,0.9);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .avatar-edit-icon {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 13px;
+      border: 2px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .avatar-tip { margin-top: 12px; font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 500; }
+    .avatar-loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #667eea;
+      font-size: 18px;
+    }
+    #avatar-input { display: none; }
+    
+    /* 表单卡片 */
+    .form-card {
+      background: white;
+      margin: 15px 15px 15px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .form-item { 
+      display: flex; 
+      align-items: center; 
+      padding: 16px 18px; 
+      border-bottom: 1px solid #f5f5f5;
+      min-height: 56px;
+      transition: background 0.2s;
+    }
+    .form-item:active { background: #fafafa; }
+    .form-item:last-child { border-bottom: none; }
+    .form-item.textarea-item { align-items: flex-start; }
+    .form-label { width: 80px; font-size: 14px; color: #333; flex-shrink: 0; padding-top: 2px; }
+    .form-label.bold { font-weight: 600; }
+    .form-input { 
+      flex: 1; 
+      border: none; 
+      outline: none; 
+      font-size: 14px; 
+      color: #333; 
+      text-align: right; 
+      background: transparent; 
+      min-height: 24px;
+      font-weight: 500;
+    }
+    .form-input::placeholder { color: #bbb; font-weight: 400; }
+    .form-textarea { 
+      flex: 1; 
+      border: none; 
+      outline: none; 
+      font-size: 14px; 
+      color: #333; 
+      resize: none; 
+      min-height: 40px; 
+      text-align: right; 
+      background: transparent; 
+      line-height: 1.5; 
+      font-weight: 500;
+    }
+    .form-textarea::placeholder { color: #bbb; font-weight: 400; }
+    .form-value { 
+      flex: 1; 
+      text-align: right; 
+      font-size: 14px; 
+      color: #666; 
+      display: flex; 
+      align-items: center; 
+      justify-content: flex-end; 
+      gap: 6px;
+      font-weight: 500;
+    }
+    .arrow-icon { color: #ccc; font-size: 12px; }
+    
+    /* Element UI 日期选择器 */
+    .el-date-editor.el-input { width: 150px; }
+    .el-input__inner { 
+      border: none !important; 
+      text-align: right !important; 
+      padding-right: 0 !important; 
+      background: transparent !important; 
+      font-size: 14px !important; 
+      color: #333 !important;
+      font-weight: 500 !important;
+    }
+    .el-input__prefix { display: none !important; }
+    .el-input__suffix { right: 0 !important; }
+    
+    /* 弹窗 */
+    .popup-mask { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0; 
+      background: rgba(0,0,0,0.5); 
+      z-index: 1000; 
+      display: flex; 
+      align-items: flex-end;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .popup-box { 
+      background: white; 
+      border-radius: 20px 20px 0 0; 
+      width: 100%;
+      max-height: 60vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .popup-title { 
+      padding: 18px; 
+      text-align: center; 
+      font-size: 16px; 
+      font-weight: 600; 
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 1;
+    }
+    .popup-option { 
+      padding: 16px; 
+      text-align: center; 
+      font-size: 15px; 
+      color: #333;
+      border-bottom: 1px solid #f5f5f5;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .popup-option:last-child { border-bottom: none; }
+    .popup-option:active { background: #f9f9f9; }
+    .popup-option.selected { color: #667eea; font-weight: 600; }
+    .popup-cancel { 
+      padding: 16px; 
+      text-align: center; 
+      font-size: 15px; 
+      color: #999; 
+      background: #fafafa;
+      margin-top: 8px;
+      cursor: pointer;
+      position: sticky;
+      bottom: 0;
+    }
+    
+    /* Toast 提示 */
+    .toast { 
+      position: fixed; 
+      top: 50%; 
+      left: 50%; 
+      transform: translate(-50%, -50%); 
+      background: rgba(0,0,0,0.75); 
+      color: white; 
+      padding: 14px 28px; 
+      border-radius: 10px; 
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 2000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
 <div id="app">
   <div class="header">
-    <div class="header-back-btn" @click="goBack" ><i class="el-icon-arrow-left"></i></div>
-    <div class="header-title">资料编辑&nbsp;&nbsp;&nbsp;</div>
+    <div class="back-btn" @click="goBack"><i class="el-icon-arrow-left"></i></div>
+    <div class="header-title">编辑资料</div>
+    <div class="save-btn" :class="{saving: saving}" @click="saveInfo">{{saving ? '保存中' : '保存'}}</div>
   </div>
-  <div class="edit-container">
-    <div class="info-box">
-      <div class="info-item">
-        <div class="info-label">头像</div>
-        <div class="info-btn">
-          <img width="35" :src="user.icon || '/imgs/icons/default-icon.png'" alt="">
-          <div><i class="el-icon-arrow-right"></i></div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="info-item">
-        <div class="info-label">昵称</div>
-        <div class="info-btn">
-          <div>{{user.nickName}}</div>
-          <div>
-            <i class="el-icon-arrow-right"></i>
-          </div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="info-item">
-        <div class="info-label">个人介绍</div>
-        <div class="info-btn">
-          <div style="overflow: hidden; width: 150px;text-align: right">{{info.introduce || '介绍一下自己'}}</div>
-          <div>
-            <i class="el-icon-arrow-right"></i>
-          </div>
-        </div>
+  
+  <div class="avatar-section">
+    <div class="avatar-wrapper" @click="selectAvatar">
+      <img class="avatar-img" :src="previewAvatar || form.icon || '/imgs/icons/default-icon.png'" alt="">
+      <div class="avatar-edit-icon"><i class="el-icon-camera"></i></div>
+      <div class="avatar-loading" v-if="uploadingAvatar">
+        <i class="el-icon-loading"></i>
       </div>
     </div>
-    <div class="info-box">
-      <div class="info-item">
-        <div class="info-label">性别</div>
-        <div class="info-btn">
-          <div>{{info.gender || '选择'}}</div>
-          <div><i class="el-icon-arrow-right"></i></div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="info-item">
-        <div class="info-label">城市</div>
-        <div class="info-btn">
-          <div>{{info.city || '选择'}}</div>
-          <div><i class="el-icon-arrow-right"></i></div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="info-item">
-        <div class="info-label">生日</div>
-        <div class="info-btn">
-          <div>{{info.birthday || '添加'}}</div>
-          <div><i class="el-icon-arrow-right"></i></div>
-        </div>
-      </div>
+    <div class="avatar-tip">点击更换头像</div>
+    <input type="file" id="avatar-input" accept="image/*" @change="handleAvatarChange" ref="avatarInput">
+  </div>
+  
+  <div class="form-card">
+    <div class="form-item">
+      <div class="form-label bold">昵称</div>
+      <input class="form-input" type="text" v-model.trim="form.nickName" placeholder="请输入昵称" maxlength="20">
     </div>
-
-    <div class="info-box">
-      <div class="info-item">
-        <div class="info-label">我的积分</div>
-        <div class="info-btn">
-          <div>查看积分</div>
-          <div><i class="el-icon-arrow-right"></i></div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="info-item">
-        <div class="info-label">会员等级</div>
-        <div class="info-btn">
-          <div><a href="javascript:void(0)">成为VIP尊享特权</a></div>
-          <div><i class="el-icon-arrow-right"></i></div>
-        </div>
-      </div>
+    <div class="form-item textarea-item">
+      <div class="form-label bold">个人介绍</div>
+      <textarea class="form-textarea" v-model.trim="form.introduce" placeholder="介绍一下自己吧" maxlength="128" rows="2"></textarea>
     </div>
   </div>
-  <foot-bar :active-btn="4"></foot-bar>
+  
+  <div class="form-card">
+    <div class="form-item" @click="showGenderPicker = true">
+      <div class="form-label">性别</div>
+      <div class="form-value">
+        <span>{{genderText}}</span>
+        <i class="el-icon-arrow-right arrow-icon"></i>
+      </div>
+    </div>
+    <div class="form-item" @click="showCityPicker = true">
+      <div class="form-label">城市</div>
+      <div class="form-value">
+        <span>{{form.city || '保密'}}</span>
+        <i class="el-icon-arrow-right arrow-icon"></i>
+      </div>
+    </div>
+    <div class="form-item">
+      <div class="form-label">出生年月</div>
+      <el-date-picker
+        v-model="form.birthday"
+        type="month"
+        placeholder="请选择年月"
+        format="yyyy年MM月"
+        value-format="yyyy-MM-01"
+        :picker-options="pickerOptions">
+      </el-date-picker>
+    </div>
+  </div>
+  
+  <!-- 性别选择弹窗 -->
+  <div class="popup-mask" v-if="showGenderPicker" @click.self="showGenderPicker = false">
+    <div class="popup-box">
+      <div class="popup-title">选择性别</div>
+      <div class="popup-option" :class="{selected: form.gender === false}" @click="selectGender(false)">男</div>
+      <div class="popup-option" :class="{selected: form.gender === true}" @click="selectGender(true)">女</div>
+      <div class="popup-option" :class="{selected: form.gender === null}" @click="selectGender(null)">保密</div>
+      <div class="popup-cancel" @click="showGenderPicker = false">取消</div>
+    </div>
+  </div>
+  
+  <!-- 城市选择弹窗 -->
+  <div class="popup-mask" v-if="showCityPicker" @click.self="showCityPicker = false">
+    <div class="popup-box">
+      <div class="popup-title">选择城市</div>
+      <div class="popup-option" :class="{selected: !form.city}" @click="selectCity('')">保密</div>
+      <div class="popup-option" v-for="city in cities" :key="city" :class="{selected: form.city === city}" @click="selectCity(city)">{{city}}</div>
+      <div class="popup-cancel" @click="showCityPicker = false">取消</div>
+    </div>
+  </div>
+  
+  <div class="toast" v-if="toastShow">{{toastMsg}}</div>
 </div>
+
 <script src="./js/vue.js"></script>
 <script src="./js/axios.min.js"></script>
-<!-- 引入组件库 -->
 <script src="./js/element.js"></script>
 <script src="./js/common.js"></script>
-<script src="./js/footer.js"></script>
 <script>
-
-  const app = new Vue({
-    el: "#app",
-    data: {
-      user: "",
-      info: {},
+new Vue({
+  el: '#app',
+  data: {
+    user: {},
+    form: {
+      nickName: '',
+      icon: '',
+      introduce: '',
+      gender: null,
+      city: '',
+      birthday: ''
     },
-    created() {
-      this.checkLogin();
-    },
-    methods: {
-      checkLogin() {
-        // 查询用户信息
-        axios.get("/user/me")
+    showGenderPicker: false,
+    showCityPicker: false,
+    saving: false,
+    toastShow: false,
+    toastMsg: '',
+    previewAvatar: null,
+    uploadingAvatar: false,
+    avatarFile: null,
+    cities: [
+      '北京', '上海', '广州', '深圳', '杭州', '南京', '苏州', '成都', 
+      '重庆', '武汉', '西安', '天津', '青岛', '厦门', '长沙', '郑州',
+      '合肥', '福州', '南昌', '济南', '大连', '沈阳', '哈尔滨', '长春'
+    ],
+    pickerOptions: {
+      disabledDate(time) {
+        return time.getTime() > Date.now();
+      }
+    }
+  },
+  computed: {
+    genderText() {
+      if (this.form.gender === false) return '男';
+      if (this.form.gender === true) return '女';
+      return '保密';
+    }
+  },
+  created() {
+    this.loadUser();
+  },
+  methods: {
+    loadUser() {
+      axios.get('/user/me')
         .then(({data}) => {
           this.user = data;
-          this.info = JSON.parse(sessionStorage.getItem("userInfo")) || {}
+          this.form.nickName = data.nickName || '';
+          this.form.icon = data.icon || '';
+          this.loadInfo();
+        })
+        .catch(() => { location.href = 'login.html'; });
+    },
+    loadInfo() {
+      axios.get('/user/info/' + this.user.id)
+        .then(({data}) => {
+          if (data) {
+            this.form.introduce = data.introduce || '';
+            this.form.gender = data.gender;
+            this.form.city = data.city || '';
+            if (data.birthday) {
+              this.form.birthday = data.birthday.substring(0, 7) + '-01';
+            }
+          }
+        });
+    },
+    selectGender(val) {
+      this.form.gender = val;
+      this.showGenderPicker = false;
+    },
+    selectCity(val) {
+      this.form.city = val;
+      this.showCityPicker = false;
+    },
+    selectAvatar() {
+      this.$refs.avatarInput.click();
+    },
+    handleAvatarChange(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        this.showToast('请选择图片文件');
+        return;
+      }
+      
+      if (file.size > 2 * 1024 * 1024) {
+        this.showToast('图片大小不能超过2MB');
+        return;
+      }
+      
+      this.previewAvatar = URL.createObjectURL(file);
+      this.avatarFile = file;
+    },
+    uploadAvatar() {
+      return new Promise((resolve, reject) => {
+        if (!this.avatarFile) {
+          resolve(null);
+          return;
+        }
+        
+        this.uploadingAvatar = true;
+        const formData = new FormData();
+        formData.append('file', this.avatarFile);
+        formData.append('userId', this.user.id);
+        
+        fetch('/upload/avatar', {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(result => {
+          if (result.success) {
+            this.form.icon = result.data;
+            this.previewAvatar = null;
+            this.avatarFile = null;
+            resolve(result.data);
+          } else {
+            this.showToast(result.errorMsg || '上传失败');
+            reject(new Error(result.errorMsg));
+          }
         })
         .catch(err => {
-          this.$message.error(err);
-          setTimeout(() => location.href = "login.html", 1000)
+          this.showToast('头像上传失败');
+          reject(err);
         })
-      },
-      goBack(){
-        history.back();
+        .finally(() => {
+          this.uploadingAvatar = false;
+        });
+      });
+    },
+    showToast(msg) {
+      this.toastMsg = msg;
+      this.toastShow = true;
+      setTimeout(() => { this.toastShow = false; }, 2000);
+    },
+    async saveInfo() {
+      if (this.saving) return;
+      if (!this.form.nickName) {
+        this.showToast('请输入昵称');
+        return;
+      }
+      
+      this.saving = true;
+      
+      try {
+        if (this.avatarFile) {
+          await this.uploadAvatar();
+        }
+        
+        const data = {
+          nickName: this.form.nickName,
+          introduce: this.form.introduce,
+          gender: this.form.gender,
+          city: this.form.city,
+          birthday: this.form.birthday || null
+        };
+        
+        if (this.form.icon) {
+          data.icon = this.form.icon;
+        }
+        
+        await axios.post('/user/info', data);
+        
+        this.showToast('保存成功');
+        setTimeout(() => { history.back(); }, 1000);
+      } catch (err) {
+        console.error(err);
+        let msg = '保存失败';
+        if (err.response) {
+          if (err.response.status === 401) msg = '请先登录';
+          else if (err.response.status === 400) msg = '参数格式错误';
+          else if (err.response.data && err.response.data.errorMsg) msg = err.response.data.errorMsg;
+        }
+        this.showToast(msg);
+      } finally {
+        this.saving = false;
       }
     },
-
-  })
+    goBack() { history.back(); }
+  }
+});
 </script>
 </body>
 </html>

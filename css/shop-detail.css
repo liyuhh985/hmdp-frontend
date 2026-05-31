@@ -13,7 +13,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 2px solid #ff6633;
+    border-bottom: 2px solid #667eea;
     position: fixed;
     top: 0;
     z-index: 500;
@@ -21,7 +21,7 @@
 
 .header-back-btn {
     width: 10%;
-    color: #ff6633;
+    color: #667eea;
     font-size: 24px;
     font-weight: bold;
 }
@@ -192,7 +192,7 @@
 }
 
 .voucher-price {
-    color: #F63;
+    color: #764ba2;
     display: flex;
     align-items: center;
 }
@@ -211,7 +211,7 @@
 }
 
 .voucher-btn {
-    background-color: #ff6633;
+    background-color: #667eea;
     color: white;
     font-size: 14px;
     line-height: 30px;
@@ -233,7 +233,7 @@
     background-color: #adacab;
 }
 .seckill-time{
-    color: #F63;
+    color: #764ba2;
 }
 .seckill-stock {
     color: #adacab;

@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
+  <title>有鱼点评</title>
   <!-- 引入样式 -->
   <link rel="stylesheet" href="./css/element.css">
 
@@ -20,6 +20,92 @@
     .liked{
 
     }
+    /* 评论输入框 */
+    .comment-input-box {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      padding: 10px 15px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .comment-input-box input {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 8px 15px;
+      outline: none;
+      font-size: 14px;
+    }
+    .comment-input-box button {
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: 14px;
+    }
+    .comment-input-box button:disabled {
+      background: #ccc;
+    }
+    /* 评论列表 */
+    .comment-item {
+      display: flex;
+      padding: 15px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .comment-item:last-child {
+      border-bottom: none;
+    }
+    .comment-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .comment-content {
+      flex: 1;
+    }
+    .comment-nickname {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .comment-time {
+      font-size: 12px;
+      color: #999;
+      margin-left: 10px;
+    }
+    .comment-text {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 5px;
+    }
+    .empty-comments {
+      text-align: center;
+      padding: 40px 0;
+      color: #999;
+    }
+    .empty-comments i {
+      font-size: 48px;
+      color: #ddd;
+    }
+    /* 评论数标签 */
+    .comments-count {
+      background: #667eea;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-left: 5px;
+    }
   </style>
 </head>
 <body>
@@ -29,7 +115,7 @@
     <div class="header-title"></div>
     <div class="header-share">...</div>
   </div>
-  <div style="height: 85%; overflow-y: scroll; overflow-x: hidden">
+  <div style="height: 85%; overflow-y: scroll; overflow-x: hidden" id="scroll-container">
     <div class="blog-info-box" ref="swiper"
          @touchstart="moveStart"
          @touchmove="moving"
@@ -51,7 +137,6 @@
           {{followed ? '取消关注' : '关注'}}
         </div>
       </div>
-
     </div>
     <div class="blog-text" v-html="blog.content">
     </div>
@@ -62,17 +147,15 @@
       <div style="width: 80%">
         <div class="name">{{shop.name}}</div>
         <div>
-          <el-rate
-              v-model="shop.score/10">
-          </el-rate>
+          <el-rate v-model="shop.score/10"></el-rate>
         </div>
-          <div class="shop-avg">￥{{shop.avgPrice}}/人</div>
+        <div class="shop-avg">￥{{shop.avgPrice}}/人</div>
       </div>
     </div>
     <div class="zan-box">
       <div>
         <svg t="1646634642977" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2187" width="20" height="20">
-          <path d="M160 944c0 8.8-7.2 16-16 16h-32c-26.5 0-48-21.5-48-48V528c0-26.5 21.5-48 48-48h32c8.8 0 16 7.2 16 16v448zM96 416c-53 0-96 43-96 96v416c0 53 43 96 96 96h96c17.7 0 32-14.3 32-32V448c0-17.7-14.3-32-32-32H96zM505.6 64c16.2 0 26.4 8.7 31 13.9 4.6 5.2 12.1 16.3 10.3 32.4l-23.5 203.4c-4.9 42.2 8.6 84.6 36.8 116.4 28.3 31.7 68.9 49.9 111.4 49.9h271.2c6.6 0 10.8 3.3 13.2 6.1s5 7.5 4 14l-48 303.4c-6.9 43.6-29.1 83.4-62.7 112C815.8 944.2 773 960 728.9 960h-317c-33.1 0-59.9-26.8-59.9-59.9v-455c0-6.1 1.7-12 5-17.1 69.5-109 106.4-234.2 107-364h41.6z m0-64h-44.9C427.2 0 400 27.2 400 60.7c0 127.1-39.1 251.2-112 355.3v484.1c0 68.4 55.5 123.9 123.9 123.9h317c122.7 0 227.2-89.3 246.3-210.5l47.9-303.4c7.8-49.4-30.4-94.1-80.4-94.1H671.6c-50.9 0-90.5-44.4-84.6-95l23.5-203.4C617.7 55 568.7 0 505.6 0z" p-id="2188" :fill="blog.isLike ? '#ff6633' : '#82848a'"></path>
+          <path d="M160 944c0 8.8-7.2 16-16 16h-32c-26.5 0-48-21.5-48-48V528c0-26.5 21.5-48 48-48h32c8.8 0 16 7.2 16 16v448zM96 416c-53 0-96 43-96 96v416c0 53 43 96 96 96h96c17.7 0 32-14.3 32-32V448c0-17.7-14.3-32-32-32H96zM505.6 64c16.2 0 26.4 8.7 31 13.9 4.6 5.2 12.1 16.3 10.3 32.4l-23.5 203.4c-4.9 42.2 8.6 84.6 36.8 116.4 28.3 31.7 68.9 49.9 111.4 49.9h271.2c6.6 0 10.8 3.3 13.2 6.1s5 7.5 4 14l-48 303.4c-6.9 43.6-29.1 83.4-62.7 112C815.8 944.2 773 960 728.9 960h-317c-33.1 0-59.9-26.8-59.9-59.9v-455c0-6.1 1.7-12 5-17.1 69.5-109 106.4-234.2 107-364h41.6z m0-64h-44.9C427.2 0 400 27.2 400 60.7c0 127.1-39.1 251.2-112 355.3v484.1c0 68.4 55.5 123.9 123.9 123.9h317c122.7 0 227.2-89.3 246.3-210.5l47.9-303.4c7.8-49.4-30.4-94.1-80.4-94.1H671.6c-50.9 0-90.5-44.4-84.6-95l23.5-203.4C617.7 55 568.7 0 505.6 0z" p-id="2188" :fill="blog.isLike ? '#667eea' : '#82848a'"></path>
         </svg>
       </div>
       <div class="zan-list">
@@ -83,69 +166,64 @@
       </div>
     </div>
     <div class="blog-divider"></div>
+    
+    <!-- 评论区域 -->
     <div class="blog-comments">
       <div class="comments-head">
-        <div>网友评价 <span>（119）</span></div>
-        <div><i class="el-icon-arrow-right"></i></div>
+        <div>评论 <span class="comments-count" v-if="comments.length > 0">{{comments.length}}</span></div>
+        <div @click="showCommentInput = true"><i class="el-icon-edit"></i> 写评论</div>
       </div>
+      
       <div class="comment-list">
-        <div class="comment-box" v-for="i in 3" :key="i">
-          <div class="comment-icon">
-            <img
-                src="https://p0.meituan.net/userheadpicbackend/57e44d6eba01aad0d8d711788f30a126549507.jpg%4048w_48h_1e_1c_1l%7Cwatermark%3D0"
-                alt="">
-          </div>
-          <div class="comment-info">
-            <div class="comment-user">叶小乙 <span>Lv5</span></div>
-            <div style="display: flex;">
-              打分
-              <el-rate disabled v-model="4.5"></el-rate>
-            </div>
-            <div style="padding: 5px 0; font-size: 14px">
-              某平台上买的券，价格可以当工作餐吃，虽然价格便宜，但是这家店一点都没有...
-            </div>
-            <div class="comment-images">
-              <img
-                  src="https://qcloud.dpfile.com/pc/6T7MfXzx7USPIkSy7jzm40qZSmlHUF2jd-FZUL6WpjE9byagjLlrseWxnl1LcbuSGybIjx5eX6WNgCPvcASYAw.jpg"
-                  alt="">
-              <img
-                  src="https://qcloud.dpfile.com/pc/sZ5q-zgglv4VXEWU71xCFjnLM_jUHq-ylq0GKivtrz3JksWQ1f7oBWZsxm1DWgcaGybIjx5eX6WNgCPvcASYAw.jpg"
-                  alt="">
-              <img
-                  src="https://qcloud.dpfile.com/pc/xZy6W4NwuRFchlOi43DVLPFsx7KWWvPqifE1JTe_jreqdsBYA9CFkeSm2ZlF0OVmGybIjx5eX6WNgCPvcASYAw.jpg"
-                  alt="">
-              <img
-                  src="https://qcloud.dpfile.com/pc/xZy6W4NwuRFchlOi43DVLPFsx7KWWvPqifE1JTe_jreqdsBYA9CFkeSm2ZlF0OVmGybIjx5eX6WNgCPvcASYAw.jpg"
-                  alt="">
-            </div>
+        <!-- 空状态 -->
+        <div class="empty-comments" v-if="!commentLoading && comments.length === 0">
+          <i class="el-icon-chat-dot-round"></i>
+          <p>暂无评论，快来抢沙发吧~</p>
+        </div>
+        
+        <!-- 评论列表 -->
+        <div class="comment-item" v-for="comment in comments" :key="comment.id">
+          <img class="comment-avatar" :src="comment.icon || '/imgs/icons/default-icon.png'" alt="">
+          <div class="comment-content">
             <div>
-              浏览641 &nbsp;&nbsp;&nbsp;&nbsp;评论5
+              <span class="comment-nickname">{{comment.nickName || '用户' + comment.userId}}</span>
+              <span class="comment-time">{{formatCommentTime(comment.createTime)}}</span>
             </div>
+            <div class="comment-text">{{comment.content}}</div>
           </div>
         </div>
-        <div
-            style="display: flex; justify-content: space-between;padding: 15px 0; border-top: 1px solid #f1f1f1; margin-top: 10px;">
-          <div>查看全部119条评价</div>
-          <div><i class="el-icon-arrow-right"></i></div>
+        
+        <!-- 加载更多 -->
+        <div v-if="hasMoreComments" style="text-align: center; padding: 15px; color: #667eea;" @click="loadMoreComments">
+          {{commentLoading ? '加载中...' : '加载更多评论'}}
         </div>
       </div>
     </div>
     <div class="blog-divider"></div>
   </div>
+  
+  <!-- 底部操作栏 -->
   <div class="foot">
     <div class="foot-box">
-      <div class="foot-view"  @click="addLike()">
+      <div class="foot-view" @click="addLike()">
         <svg t="1646634642977" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2187" width="26" height="26">
-          <path d="M160 944c0 8.8-7.2 16-16 16h-32c-26.5 0-48-21.5-48-48V528c0-26.5 21.5-48 48-48h32c8.8 0 16 7.2 16 16v448zM96 416c-53 0-96 43-96 96v416c0 53 43 96 96 96h96c17.7 0 32-14.3 32-32V448c0-17.7-14.3-32-32-32H96zM505.6 64c16.2 0 26.4 8.7 31 13.9 4.6 5.2 12.1 16.3 10.3 32.4l-23.5 203.4c-4.9 42.2 8.6 84.6 36.8 116.4 28.3 31.7 68.9 49.9 111.4 49.9h271.2c6.6 0 10.8 3.3 13.2 6.1s5 7.5 4 14l-48 303.4c-6.9 43.6-29.1 83.4-62.7 112C815.8 944.2 773 960 728.9 960h-317c-33.1 0-59.9-26.8-59.9-59.9v-455c0-6.1 1.7-12 5-17.1 69.5-109 106.4-234.2 107-364h41.6z m0-64h-44.9C427.2 0 400 27.2 400 60.7c0 127.1-39.1 251.2-112 355.3v484.1c0 68.4 55.5 123.9 123.9 123.9h317c122.7 0 227.2-89.3 246.3-210.5l47.9-303.4c7.8-49.4-30.4-94.1-80.4-94.1H671.6c-50.9 0-90.5-44.4-84.6-95l23.5-203.4C617.7 55 568.7 0 505.6 0z" p-id="2188" :fill="blog.isLike ? '#ff6633' : '#82848a'"></path>
+          <path d="M160 944c0 8.8-7.2 16-16 16h-32c-26.5 0-48-21.5-48-48V528c0-26.5 21.5-48 48-48h32c8.8 0 16 7.2 16 16v448zM96 416c-53 0-96 43-96 96v416c0 53 43 96 96 96h96c17.7 0 32-14.3 32-32V448c0-17.7-14.3-32-32-32H96zM505.6 64c16.2 0 26.4 8.7 31 13.9 4.6 5.2 12.1 16.3 10.3 32.4l-23.5 203.4c-4.9 42.2 8.6 84.6 36.8 116.4 28.3 31.7 68.9 49.9 111.4 49.9h271.2c6.6 0 10.8 3.3 13.2 6.1s5 7.5 4 14l-48 303.4c-6.9 43.6-29.1 83.4-62.7 112C815.8 944.2 773 960 728.9 960h-317c-33.1 0-59.9-26.8-59.9-59.9v-455c0-6.1 1.7-12 5-17.1 69.5-109 106.4-234.2 107-364h41.6z m0-64h-44.9C427.2 0 400 27.2 400 60.7c0 127.1-39.1 251.2-112 355.3v484.1c0 68.4 55.5 123.9 123.9 123.9h317c122.7 0 227.2-89.3 246.3-210.5l47.9-303.4c7.8-49.4-30.4-94.1-80.4-94.1H671.6c-50.9 0-90.5-44.4-84.6-95l23.5-203.4C617.7 55 568.7 0 505.6 0z" p-id="2188" :fill="blog.isLike ? '#667eea' : '#82848a'"></path>
         </svg>
         <span :class="{liked: blog.isLike}">{{blog.liked}}</span>
       </div>
     </div>
     <div style="width: 40%">
     </div>
-    <div class="foot-box">
-      <div class="foot-view"><i class="el-icon-chat-square"></i></div>
+    <div class="foot-box" @click="showCommentInput = true">
+      <div class="foot-view"><i class="el-icon-chat-square"></i> <span>{{comments.length}}</span></div>
     </div>
+  </div>
+  
+  <!-- 评论输入框 -->
+  <div class="comment-input-box" v-if="showCommentInput">
+    <input type="text" v-model="newComment" placeholder="说点什么吧..." @keyup.enter="submitComment">
+    <button @click="submitComment" :disabled="!newComment.trim() || submitting">发送</button>
+    <button @click="showCommentInput = false" style="background: #999;">取消</button>
   </div>
 </div>
 <script src="./js/vue.js"></script>
@@ -182,7 +260,15 @@
         y: 0
       },
       sensitivity: 60,
-      resistance: 0.3
+      resistance: 0.3,
+      // 评论相关
+      comments: [],
+      commentLoading: false,
+      commentCurrent: 1,
+      hasMoreComments: true,
+      showCommentInput: false,
+      newComment: '',
+      submitting: false
     },
     created() {
       let id = util.getUrlParam("id");
@@ -216,6 +302,7 @@
             this.$nextTick(this.init);
             this.queryShopById(data.shopId)
             this.queryLikeList(id);
+            this.queryComments(id);
             this.queryLoginUser();
           })
           .catch(this.$message.error)
@@ -232,6 +319,83 @@
         axios.get("/blog/likes/" + id)
           .then(({data}) => this.likes = data)
           .catch(this.$message.error)
+      },
+      // 查询评论列表
+      queryComments(blogId) {
+        this.commentLoading = true;
+        axios.get("/blog-comments/" + blogId, {
+          params: {
+            current: this.commentCurrent,
+            size: 10
+          }
+        })
+          .then(({data}) => {
+            if (data && data.length > 0) {
+              this.comments = this.comments.concat(data);
+              this.hasMoreComments = data.length >= 10;
+            } else {
+              this.hasMoreComments = false;
+            }
+          })
+          .catch(err => {
+            console.log('评论接口暂未实现');
+            this.hasMoreComments = false;
+          })
+          .finally(() => {
+            this.commentLoading = false;
+          });
+      },
+      // 加载更多评论
+      loadMoreComments() {
+        if (this.commentLoading || !this.hasMoreComments) return;
+        this.commentCurrent++;
+        this.queryComments(this.blog.id);
+      },
+      // 发表评论
+      submitComment() {
+        if (!this.newComment.trim() || this.submitting) return;
+        
+        // 检查是否登录
+        if (!this.user || !this.user.id) {
+          this.$message.warning('请先登录');
+          location.href = '/login.html';
+          return;
+        }
+        
+        this.submitting = true;
+        axios.post("/blog-comments", {
+          blogId: this.blog.id,
+          content: this.newComment.trim()
+        })
+          .then(({data}) => {
+            this.$message.success('评论成功');
+            // 刷新评论列表
+            this.comments = [];
+            this.commentCurrent = 1;
+            this.queryComments(this.blog.id);
+            this.newComment = '';
+            this.showCommentInput = false;
+          })
+          .catch(err => {
+            this.$message.error('评论失败，请稍后重试');
+          })
+          .finally(() => {
+            this.submitting = false;
+          });
+      },
+      // 格式化评论时间
+      formatCommentTime(time) {
+        if (!time) return '';
+        const date = new Date(time);
+        const now = new Date();
+        const diff = (now - date) / 1000;
+        
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+        if (diff < 604800) return Math.floor(diff / 86400) + '天前';
+        
+        return (date.getMonth() + 1) + '月' + date.getDate() + '日';
       },
       addLike(){
         axios.put("/blog/like/" +this.blog.id)
@@ -305,13 +469,11 @@
         })
       },
       moveStart(e) {
-        console.log('moveStart')
         this.start.x = e.changedTouches[0].pageX
         this.start.y = e.changedTouches[0].pageY
         this.setTransition('none')
       },
       moving(e) {
-        console.log('moving')
         e.preventDefault()
         e.stopPropagation()
         let distanceX = e.changedTouches[0].pageX - this.start.x
@@ -328,7 +490,6 @@
         }
       },
       moveEnd(e) {
-        console.log('moveEnd')
         if (this.isMoving) {
           e.preventDefault()
           e.stopPropagation()
@@ -384,5 +545,6 @@
     }
   })
 </script>
+<script src="/js/float-chat.js"></script>
 </body>
 </html>

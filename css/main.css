@@ -16,21 +16,24 @@ html,body,#app{
 }
 .el-tabs__active-bar {
     height: 4px;
-    background-image: linear-gradient(to right, #F63, #f5b9a2);
+    background-image: linear-gradient(to right, #667eea, #764ba2);
 }
 
-/* 底部导航栏 */
+/* 底部导航栏 - 毛玻璃效果 */
 .foot {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 55px;
-    background: white;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
     justify-content: space-around;
     align-items: center;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
     z-index: 999;
 }
 
@@ -39,12 +42,15 @@ html,body,#app{
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 5px 10px;
+    padding: 6px 12px;
     color: #999;
+    cursor: pointer;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .foot-box.active {
-    color: #ff6633;
+    color: #667eea;
 }
 
 .foot-view {
@@ -57,14 +63,35 @@ html,body,#app{
     font-size: 10px;
     height: 14px;
     line-height: 14px;
-    margin-top: 2px;
+    margin-top: 3px;
+    font-weight: 500;
 }
 
+/* 发布按钮 - 使用更柔和的蓝色滤镜 */
 .foot .add-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 22px;
-    box-shadow: 0 2px 8px rgba(255, 99, 51, 0.3);
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 24px !important;
+    filter: brightness(0) saturate(100%) invert(51%) sepia(98%) saturate(1925%) hue-rotate(213deg) brightness(101%) contrast(97%);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
+}
+
+/* 未读消息标记 */
+.nav-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 10px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    font-weight: 600;
 }
 
 /*element-ui的评价星星间隙*/

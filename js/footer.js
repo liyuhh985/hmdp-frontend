@@ -15,6 +15,7 @@ Vue.component("footBar", {
     <div class="foot-box" :class="{active: activeBtn === 3}" @click="toPage(3)">
       <div class="foot-view"><i class="el-icon-chat-dot-round"></i></div>
       <div class="foot-text">消息</div>
+      <span class="nav-badge" v-if="unread > 0">{{unread > 99 ? '99+' : unread}}</span>
     </div>
     <div class="foot-box" :class="{active: activeBtn === 4}" @click="toPage(4)">
       <div class="foot-view"><i class="el-icon-user"></i></div>
@@ -23,10 +24,18 @@ Vue.component("footBar", {
   </div>
   `,
   data() {
-    return {
+    return {}
+  },
+  props: {
+    activeBtn: {
+      type: Number,
+      default: 0
+    },
+    unread: {
+      type: Number,
+      default: 0
     }
   },
-  props: ['activeBtn'],
   methods: {
     toPage(i) {
       if (i === 0) {

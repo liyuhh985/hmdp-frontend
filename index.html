@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
+  <title>有鱼点评</title>
   <link rel="stylesheet" href="./css/element.css">
   <link rel="stylesheet" href="./css/main.css">
   <style>
@@ -17,27 +17,30 @@
     
     /* 底部导航 */
     .foot {
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
       position: fixed !important;
       bottom: 0 !important;
       left: 0 !important;
       right: 0 !important;
-      background: #fff !important;
-      height: 55px !important;
+      background: rgba(255, 255, 255, 0.75) !important;
+      height: 60px !important;
       z-index: 9999 !important;
       display: flex !important;
       justify-content: space-around !important;
       align-items: center !important;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.08) !important;
+      box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.06) !important;
     }
-    .foot-box { display: flex !important; flex-direction: column !important; align-items: center !important; padding: 5px 10px !important; color: #999 !important; }
-    .foot-box.active { color: #ff6633 !important; }
+    .foot-box { display: flex !important; flex-direction: column !important; align-items: center !important; padding: 5px 10px !important; color: #999 !important; -webkit-tap-highlight-color: transparent !important; }
+    .foot-box.active { color: #667eea !important; }
     .foot-view { font-size: 20px !important; height: 24px; line-height: 24px !important; }
     .foot-text { font-size: 10px !important; height: 14px; line-height: 14px !important; margin-top: 2px !important; }
-    .foot .add-btn { width: 44px !important; height: 44px !important; border-radius: 22px !important; }
+    .foot .add-btn { width: 48px !important; height: 48px !important; border-radius: 24px !important; filter: brightness(0) saturate(100%) invert(51%) sepia(98%) saturate(1925%) hue-rotate(213deg) brightness(101%) contrast(97%); box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35); }
     
     /* 搜索栏 */
     .search-bar {
-      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       padding: 12px 15px;
       display: flex;
       align-items: center;
@@ -122,7 +125,7 @@
       display: inline-block;
       width: 3px;
       height: 14px;
-      background: linear-gradient(180deg, #ff6633 0%, #ff8c42 100%);
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
       border-radius: 2px;
       margin-right: 8px;
       vertical-align: middle;
@@ -183,7 +186,13 @@
       font-size: 11px;
       color: #999;
     }
-    .blog-like.liked { color: #ff6633; }
+    .blog-like.liked { color: #667eea; }
+    .blog-like.liked svg { animation: likeJump 0.3s ease; }
+    @keyframes likeJump {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
     
     /* 空状态 */
     .empty-state {
@@ -207,7 +216,7 @@
 <div id="app">
   <!-- 搜索栏 -->
   <div class="search-bar">
-    <div class="city-btn">杭州 <i class="el-icon-arrow-down"></i></div>
+    <div class="city-btn" @click="toMap">附近 <i class="el-icon-location"></i></div>
     <div class="search-input">
       <i class="el-icon-search"></i>
       <input type="text" placeholder="搜索商户、地点" v-model="searchKey" @keyup.enter="doSearch">
@@ -240,8 +249,8 @@
           <img class="blog-avatar" :src="b.icon || '/imgs/icons/default-icon.png'">
           <span class="blog-author">{{b.name}}</span>
           <span class="blog-like" :class="{liked: b.isLike}" @click.stop="addLike(b)">
-            <svg width="12" height="12" viewBox="0 0 1024 1024" style="margin-right:2px;">
-              <path d="M505.6 64c16.2 0 26.4 8.7 31 13.9 4.6 5.2 12.1 16.3 10.3 32.4l-23.5 203.4c-4.9 42.2 8.6 84.6 36.8 116.4 28.3 31.7 68.9 49.9 111.4 49.9h271.2c6.6 0 10.8 3.3 13.2 6.1s5 7.5 4 14l-48 303.4c-6.9 43.6-29.1 83.4-62.7 112C815.8 944.2 773 960 728.9 960h-317c-33.1 0-59.9-26.8-59.9-59.9v-455c0-6.1 1.7-12 5-17.1 69.5-109 106.4-234.2 107-364h41.6z" :fill="b.isLike ? '#ff6633' : '#ccc'"/>
+            <svg width="14" height="14" viewBox="0 0 24 24" style="margin-right:4px;vertical-align:-2px;transition: all 0.2s;">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" :fill="b.isLike ? '#667eea' : '#ccc'"/>
             </svg>
             {{b.liked || 0}}
           </span>
@@ -259,7 +268,7 @@
     </div>
   </div>
 
-  <foot-bar :active-btn="1"></foot-bar>
+  <foot-bar :active-btn="1" :unread="unreadCount"></foot-bar>
 </div>
 
 <script src="./js/vue.js"></script>
@@ -277,11 +286,13 @@ new Vue({
     searchKey: '',
     blogLoading: false,
     blogLoadingMore: false,
-    isReachBottom: false
+    isReachBottom: false,
+    unreadCount: 0
   },
   mounted() {
     this.loadTypes();
     this.loadBlogs();
+    this.loadUnreadCount();
     window.addEventListener('scroll', this.onScroll);
   },
   methods: {
@@ -296,6 +307,14 @@ new Vue({
           this.blogs = this.blogs.concat(data);
         })
         .finally(() => { this.blogLoading = false; this.blogLoadingMore = false; });
+    },
+    loadUnreadCount() {
+      axios.get('/message/unread')
+        .then(({data}) => {
+          if (data) {
+            this.unreadCount = (data.interact || 0) + (data.system || 0) + (data.order || 0);
+          }
+        }).catch(() => {});
     },
     onScroll() {
       const scrollTop = window.scrollY;
@@ -323,9 +342,12 @@ new Vue({
     },
     toShopList(id, name) { location.href = '/shop-list.html?type=' + id + '&name=' + name; },
     toBlogDetail(b) { location.href = '/blog-detail.html?id=' + b.id; },
-    toUserInfo() { location.href = '/info.html'; }
+    toUserInfo() { location.href = '/info.html'; },
+    toMap() { location.href = '/map.html'; }
   }
 });
 </script>
+<!-- AI 助手浮动组件 -->
+<script src="./js/float-chat.js"></script>
 </body>
 </html>

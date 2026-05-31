@@ -3,159 +3,444 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
-  <!-- 引入样式 -->
+  <title>有鱼点评 - 发布笔记</title>
   <link rel="stylesheet" href="./css/element.css">
   <link href="./css/main.css" rel="stylesheet">
-  <link href="./css/blog-edit.css" rel="stylesheet">
-
-  <style type="text/css">
-
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { font-size: 12px; }
+    body { background: #f5f5f5; font-family: -apple-system, "PingFang SC", sans-serif; }
+    
+    /* 顶部导航 */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(102, 126, 234, 0.2);
+    }
+    .header-cancel-btn {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+    .header-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: white;
+    }
+    .header-commit-btn {
+      background: rgba(255,255,255,0.95);
+      color: #667eea;
+      padding: 7px 18px;
+      border-radius: 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .header-commit-btn:active { transform: scale(0.95); }
+    
+    /* 上传区域 */
+    .upload-section {
+      background: white;
+      padding: 15px;
+      margin-bottom: 10px;
+    }
+    .upload-tip {
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .upload-box {
+      display: flex;
+      overflow-x: auto;
+      gap: 10px;
+      padding-bottom: 5px;
+    }
+    .upload-box::-webkit-scrollbar { display: none; }
+    .upload-btn {
+      width: 80px;
+      height: 100px;
+      background: linear-gradient(135deg, #f8f9ff 0%, #f0f2f8 100%);
+      border: 2px dashed #c5d4ff;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #667eea;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-btn:active { transform: scale(0.95); border-color: #667eea; }
+    .upload-btn i { font-size: 26px; margin-bottom: 5px; }
+    .upload-btn span { font-size: 11px; }
+    
+    .pic-box {
+      width: 80px;
+      height: 100px;
+      border-radius: 12px;
+      position: relative;
+      flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .pic-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .pic-box i {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 20px;
+      height: 20px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    
+    /* 表单区域 */
+    .form-section {
+      background: white;
+      margin-bottom: 10px;
+    }
+    .blog-title input {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .blog-title input::placeholder { color: #bbb; font-weight: 400; }
+    .blog-content textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 15px;
+      font-size: 14px;
+      line-height: 1.6;
+      border: none;
+      resize: none;
+    }
+    .blog-content textarea::placeholder { color: #bbb; }
+    
+    /* 关联商户 */
+    .shop-select {
+      background: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .shop-select:active { background: #fafafa; }
+    .shop-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+    .shop-value {
+      font-size: 14px;
+      color: #999;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .shop-value.selected { color: #667eea; }
+    
+    /* 遮罩 */
+    .mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 299;
+      animation: fadeIn 0.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    /* 商户选择弹窗 */
+    .shop-dialog {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60vh;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .dialog-header {
+      padding: 18px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+      flex-shrink: 0;
+    }
+    .search-bar {
+      display: flex;
+      align-items: center;
+      padding: 12px 15px;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .city-select {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+    }
+    .search-input {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 20px;
+      padding: 8px 15px;
+      gap: 8px;
+    }
+    .search-input i { color: #999; font-size: 14px; }
+    .search-input input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+    }
+    .search-input input:focus { outline: none; }
+    
+    .shop-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 15px 15px;
+    }
+    .shop-item {
+      padding: 15px 0;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .shop-item:active { background: #fafafa; }
+    .shop-item:last-child { border-bottom: none; }
+    .shop-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .shop-area {
+      font-size: 12px;
+      color: #999;
+    }
   </style>
 </head>
 <body>
 <div id="app">
   <div class="header">
     <div class="header-cancel-btn" @click="goBack">取消</div>
-    <div class="header-title">&nbsp;&nbsp;发笔记<i class="el-icon-info"></i></div>
-    <div class="header-commit">
-      <div class="header-commit-btn" @click="submitBlog">发布</div>
-    </div>
+    <div class="header-title">发布笔记</div>
+    <div class="header-commit-btn" @click="submitBlog">发布</div>
   </div>
-  <div class="upload-box">
-    <input type="file" @change="fileSelected" name="file" ref="fileInput" style="display: none">
-    <div class="upload-btn" @click="openFileDialog">
-      <i class="el-icon-camera"></i>
-      <div style="font-size: 12px;line-height: 12px">上传照片</div>
-    </div>
-    <div class="pic-list">
+  
+  <input type="file" @change="fileSelected" name="file" ref="fileInput" style="display: none" accept="image/*">
+  
+  <div class="upload-section">
+    <div class="upload-tip">添加图片</div>
+    <div class="upload-box">
+      <div class="upload-btn" @click="openFileDialog">
+        <i class="el-icon-camera"></i>
+        <span>上传照片</span>
+      </div>
       <div class="pic-box" v-for="(f,i) in fileList" :key="i">
         <img :src="f" alt="">
         <i class="el-icon-close" @click="deletePic(i)"></i>
       </div>
     </div>
   </div>
-  <div class="blog-title">
-    <input v-model="params.title" type="text" placeholder="填写标题更容易上首页哦~">
+  
+  <div class="form-section">
+    <div class="blog-title">
+      <input v-model="params.title" type="text" placeholder="填写标题更容易被看到哦~" maxlength="50">
+    </div>
+    <div class="blog-content">
+      <textarea v-model="params.content" placeholder="分享你的探店体验吧~" maxlength="500"></textarea>
+    </div>
   </div>
-  <div class="blog-content">
-    <textarea v-model="params.content" placeholder="最近打卡了什么地方，有什么新奇体验呢？"></textarea>
+  
+  <div class="shop-select" @click="showDialog=true">
+    <div class="shop-label">关联商户</div>
+    <div class="shop-value" :class="{selected: selectedShop.name}">
+      <span>{{selectedShop.name || '选择商户'}}</span>
+      <i class="el-icon-arrow-right"></i>
+    </div>
   </div>
-  <div class="divider"></div>
-  <div class="blog-shop" @click="showDialog=true">
-    <div class="shop-left">关联商户</div>
-    <div v-if="selectedShop.name">{{selectedShop.name}}</div>
-    <div v-else>去选择&nbsp;<i class="el-icon-arrow-right"></i></div>
-  </div>
+  
   <div class="mask" v-show="showDialog" @click="showDialog=false"></div>
-
+  
   <transition name="el-zoom-in-bottom">
     <div class="shop-dialog" v-show="showDialog">
-      <div class="blog-shop">
-        <div class="shop-left">关联商户</div>
-      </div>
+      <div class="dialog-header">选择商户</div>
       <div class="search-bar">
-        <div class="city-select">杭州 <i class="el-icon-arrow-down"></i></div>
+        <div class="city-select">杭州 <i class="el-icon-arrow-down" style="font-size: 12px;"></i></div>
         <div class="search-input">
           <i class="el-icon-search" @click="queryShops"></i>
-          <input v-model="shopName" type="text" placeholder="搜索商户名称">
+          <input v-model="shopName" type="text" placeholder="搜索商户名称" @keyup.enter="queryShops">
         </div>
       </div>
       <div class="shop-list">
-        <div v-for="s in shops" class="shop-item" @click="selectShop(s)">
+        <div v-for="s in shops" class="shop-item" :key="s.id" @click="selectShop(s)">
           <div class="shop-name">{{s.name}}</div>
-          <div>{{s.area}}</div>
+          <div class="shop-area">{{s.area}}</div>
         </div>
+        <div v-if="shops.length === 0" style="text-align: center; color: #999; padding: 30px;">暂无搜索结果</div>
       </div>
     </div>
   </transition>
 </div>
+
 <script src="./js/vue.js"></script>
 <script src="./js/axios.min.js"></script>
-<!-- 引入组件库 -->
 <script src="./js/element.js"></script>
 <script src="./js/common.js"></script>
-<script src="./js/footer.js"></script>
 <script>
-
-  const app = new Vue({
-    el: "#app",
-    data() {
-      return {
-        util,
-        fileList: [], // 文件列表
-        params: {},
-        showDialog: false, //
-        shops: [], // 商户信息
-        shopName: "", //商户名称
-        selectedShop: {}, // 选中的商户
+const app = new Vue({
+  el: "#app",
+  data() {
+    return {
+      fileList: [],
+      params: {},
+      showDialog: false,
+      shops: [],
+      shopName: "",
+      selectedShop: {}
+    }
+  },
+  created() {
+    this.checkLogin();
+    this.queryShops();
+  },
+  methods: {
+    queryShops() {
+      axios.get("/shop/of/name?name=" + this.shopName)
+        .then(({data}) => this.shops = data)
+        .catch(this.$message.error)
+    },
+    selectShop(s) {
+      this.selectedShop = s;
+      this.showDialog = false;
+    },
+    submitBlog() {
+      if (!this.params.title) {
+        this.$message.warning('请填写标题');
+        return;
       }
-    },
-    created() {
-      this.checkLogin();
-      this.queryShops();
-    },
-    methods: {
-      queryShops() {
-        axios.get("/shop/of/name?name=" + this.shopName)
-          .then(({data}) => this.shops = data)
-          .catch(this.$message.error)
-      },
-      selectShop(s) {
-        this.selectedShop = s;
-        this.showDialog = false;
-      },
-      submitBlog() {
-        let {...data} = this.params;
-        data.images = this.fileList.join(",");
-        data.shopId = this.selectedShop.id;
-        axios.post("/blog", data)
-          .then(resp => location.href = "/info.html")
-          .catch(this.$message.error)
-      },
-      openFileDialog() {
-        this.$refs.fileInput.click();
-      },
-      fileSelected() {
-        let file = this.$refs.fileInput.files[0];
-        let formData = new FormData();
-        formData.append("file", file);
-        const config = {
-          headers: {"Content-Type": "multipart/form-data;boundary=" + new Date().getTime()}
-        };
-        axios
-          .post("/upload/blog", formData, config)
-          .then(({data}) => this.fileList.push('/imgs' + data))
-          .catch(this.$message.error);
-      },
-      deletePic(i) {
-        axios.get("/upload/blog/delete?name=" + this.fileList[i])
-          .then(() => this.fileList.splice(i, 1))
-          .catch(this.$message.error)
-      },
-      checkLogin() {
-        // 获取token
-        let token = sessionStorage.getItem("token");
-        if (!token) {
-          location.href = "login.html"
-        }
-        // 查询用户信息
-        axios.get("/user/me")
-          .then()
-          .catch(err => {
-            this.$message.error(err);
-            setTimeout(() => location.href = "login.html", 200)
-          })
-      },
-      goBack() {
-        history.back();
-      },
-      handleRemove(file) {
-        console.log(file);
+      if (!this.params.content) {
+        this.$message.warning('请填写内容');
+        return;
       }
+      if (this.fileList.length === 0) {
+        this.$message.warning('请上传至少一张图片');
+        return;
+      }
+      
+      let {...data} = this.params;
+      data.images = this.fileList.join(",");
+      data.shopId = this.selectedShop.id;
+      axios.post("/blog", data)
+        .then(() => {
+          this.$message.success('发布成功');
+          setTimeout(() => location.href = "/info.html", 1000);
+        })
+        .catch(this.$message.error)
     },
-
-  })
+    openFileDialog() {
+      if (this.fileList.length >= 9) {
+        this.$message.warning('最多上传9张图片');
+        return;
+      }
+      this.$refs.fileInput.click();
+    },
+    fileSelected() {
+      let file = this.$refs.fileInput.files[0];
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        this.$message.error('请选择图片文件');
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        this.$message.error('图片大小不能超过5MB');
+        return;
+      }
+      
+      let formData = new FormData();
+      formData.append("file", file);
+      const config = {
+        headers: {"Content-Type": "multipart/form-data;boundary=" + new Date().getTime()}
+      };
+      axios
+        .post("/upload/blog", formData, config)
+        .then(({data}) => {
+          this.fileList.push('/imgs' + data);
+          this.$refs.fileInput.value = '';
+        })
+        .catch(this.$message.error);
+    },
+    deletePic(i) {
+      axios.get("/upload/blog/delete?name=" + this.fileList[i])
+        .then(() => this.fileList.splice(i, 1))
+        .catch(this.$message.error)
+    },
+    checkLogin() {
+      let token = sessionStorage.getItem("token");
+      if (!token) {
+        location.href = "login.html";
+        return;
+      }
+      axios.get("/user/me")
+        .then()
+        .catch(err => {
+          this.$message.error('请先登录');
+          setTimeout(() => location.href = "login.html", 1000);
+        })
+    },
+    goBack() {
+      history.back();
+    }
+  }
+})
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /*搜索框*/
 .search-bar{
-    background-color: #ff6633;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     display: flex;
     justify-content: space-around;
@@ -9,7 +9,6 @@
     padding: 0 8px;
 }
 .header-icon{
-    /*width: 2%;*/
     font-size: 14px;
 }
 .search-input{

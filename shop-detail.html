@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>黑马点评</title>
+  <title>有鱼点评</title>
   <!-- 引入样式 -->
   <link rel="stylesheet" href="./css/element.css">
 
@@ -11,7 +11,92 @@
   <link href="./css/main.css" rel="stylesheet">
 
   <style type="text/css">
-
+    .comment-item {
+      display: flex;
+      padding: 15px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .comment-item:last-child {
+      border-bottom: none;
+    }
+    .comment-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .comment-content {
+      flex: 1;
+    }
+    .comment-nickname {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .comment-time {
+      font-size: 12px;
+      color: #999;
+      margin-left: 10px;
+    }
+    .comment-text {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.6;
+      margin-top: 5px;
+    }
+    .empty-comments {
+      text-align: center;
+      padding: 40px 0;
+      color: #999;
+    }
+    .empty-comments i {
+      font-size: 48px;
+      color: #ddd;
+    }
+    .comments-count {
+      background: #667eea;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-left: 5px;
+    }
+    /* 底部导航栏 */
+    body {
+      padding-bottom: 60px;
+    }
+    .foot {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      background: rgba(255, 255, 255, 0.75) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important;
+      height: 60px !important;
+      z-index: 9999 !important;
+      display: flex !important;
+      justify-content: space-around !important;
+      align-items: center !important;
+      box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.06) !important; border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+    .foot-box { display: flex !important; flex-direction: column !important; align-items: center !important; padding: 5px 10px !important; color: #999 !important; }
+    .foot-box.active { color: #667eea !important; }
+    .foot-view { font-size: 20px !important; height: 24px; line-height: 24px !important; }
+    .foot-text { font-size: 10px !important; height: 14px; line-height: 14px !important; margin-top: 2px !important; }
+    .foot .add-btn { width: 48px !important; height: 48px !important; border-radius: 24px !important; filter: brightness(0) saturate(100%) invert(51%) sepia(98%) saturate(1925%) hue-rotate(213deg) brightness(101%) contrast(97%); box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35); }
+    .nav-badge {
+      position: absolute;
+      top: -5px;
+      right: -8px;
+      background: #ff4444;
+      color: white;
+      font-size: 10px;
+      padding: 2px 5px;
+      border-radius: 10px;
+      min-width: 16px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -27,15 +112,18 @@
     <div class="shop-rate">
       <el-rate
           disabled v-model="shop.score/10"
-          text-color="#F63"
+          text-color="#764ba2"
           show-score
       ></el-rate>
-      <span>{{shop.comments}}条</span>
+      <span>{{reviewTotal}}条评价</span>
     </div>
-    <div class="shop-rate-info"> 口味:4.9  环境:4.8  服务:4.7 </div>
-    <div class="shop-rank">
+    <div class="shop-rate-info">
+      <span>人均：￥{{shop.avgPrice || '-'}}</span>
+      <span style="margin-left: 15px;">销量：{{shop.sold || 0}}+</span>
+    </div>
+    <div class="shop-rank" @click="showRankTip">
       <img src="/imgs/bd.png" width="63" height="20" alt="">
-      <span>拱墅区好评榜第3名</span>
+      <span>好评榜 第{{shopRank}}名</span>
       <div><i class="el-icon-arrow-right"></i></div>
     </div>
     <div class="shop-images">
@@ -47,16 +135,15 @@
       <div><i class="el-icon-map-location"></i></div>
       <span>{{shop.address}}</span>
       <div style="width: 10px; flex-grow: 2; text-align: center; color: #e1e2e3">|</div>
-      <div style="margin: 0 5px"><img src="https://p0.meituan.net/travelcube/bf684aa196c870810655e45b1e52ce843484.png@24w_16h_40q" alt=""></div>
-      <div><img src="https://p0.meituan.net/travelcube/9277ace32123e0c9f59dedf4407892221566.png@24w_24h_40q" alt=""></div>
+      <div style="margin: 0 5px; cursor: pointer;" @click="showTip('停车')"><img src="https://p0.meituan.net/travelcube/bf684aa196c870810655e45b1e52ce843484.png@24w_16h_40q" alt="停车"></div>
+      <div style="cursor: pointer;" @click="showTip('电话')"><img src="https://p0.meituan.net/travelcube/9277ace32123e0c9f59dedf4407892221566.png@24w_24h_40q" alt="电话"></div>
     </div>
   </div>
   <div class="shop-divider"></div>
   <div class="shop-open-time">
     <span><i class="el-icon-watch"></i></span>
     <div>营业时间</div>
-    <div>{{shop.openHours}}</div>
-    <span class="line-right">查看详情 <i class="el-icon-arrow-right"></i></span>
+    <div>{{shop.openHours || '暂无'}}</div>
   </div>
   <div class="shop-divider"></div>
   <div class="shop-voucher">
@@ -73,76 +160,94 @@
       <div class="voucher-left">
         <div class="voucher-title">{{v.title}}</div>
         <div class="voucher-subtitle">{{v.subTitle}}</div>
-        <div class="voucher-price"><div>￥ {{util.formatPrice(v.payValue)}}</div>  <span>{{(v.payValue*10)/v.actualValue}}折</span></div>
+        <div class="voucher-price"><div>￥ {{util.formatPrice(v.payValue)}}</div>  <span>{{((v.payValue*10)/v.actualValue).toFixed(1)}}折</span></div>
       </div>
       <div class="voucher-right">
-        <div v-if="v.type" class="seckill-box">
-          <div class="voucher-btn" :class="{'disable-btn': isNotBegin(v) || v.stock < 1}" @click="seckill(v)">限时抢购</div>
+        <!-- 秒杀券 -->
+        <div v-if="v.type === 1" class="seckill-box">
+          <div class="voucher-btn" @click="seckill(v)">限时抢购</div>
           <div class="seckill-stock">剩余 <span>{{v.stock}}</span> 张</div>
-          <div class="seckill-time">{{formatTime(v)}}</div>
+          <div class="seckill-time" v-if="v.beginTime && v.endTime">
+            {{formatSeckillTime(v)}}
+          </div>
         </div>
-        <div class="voucher-btn" v-else>抢购</div>
+        <!-- 普通券 -->
+        <div v-else class="voucher-btn" @click="buyVoucher(v)">领取</div>
       </div>
     </div>
   </div>
   <div class="shop-divider"></div>
+  
+  <!-- 网友评价 -->
   <div class="shop-comments">
     <div class="comments-head">
-      <div>网友评价 <span>（119）</span></div>
-      <div><i class="el-icon-arrow-right"></i></div>
+      <div>网友评价 <span class="comments-count" v-if="reviewTotal > 0">{{reviewTotal}}</span></div>
+      <div @click="showReviewDialog = true" style="color: #667eea;"><i class="el-icon-edit"></i> 写评论</div>
     </div>
-    <div class="comment-tags">
-      <div class="tag">味道赞(19)</div>
-      <div class="tag">牛肉赞(16)</div>
-      <div class="tag">菜品不错(11)</div>
-      <div class="tag">回头客(4)</div>
-      <div class="tag">分量足(4)</div>
-      <div class="tag">停车方便(3)</div>
-      <div class="tag">海鲜棒(3)</div>
-      <div class="tag">饮品赞(3)</div>
-      <div class="tag">朋友聚餐(6)</div>
-    </div>
+    
     <div class="comment-list">
-      <div class="comment-box" v-for="i in 3" :key="i">
-        <div class="comment-icon">
-          <img src="https://p0.meituan.net/userheadpicbackend/57e44d6eba01aad0d8d711788f30a126549507.jpg%4048w_48h_1e_1c_1l%7Cwatermark%3D0" alt="">
-        </div>
-        <div class="comment-info">
-          <div class="comment-user">叶小乙 <span>Lv5</span></div>
-          <div style="display: flex;">
-            打分
-            <el-rate disabled v-model="4.5" ></el-rate>
-          </div>
-          <div style="padding: 5px 0; font-size: 14px">
-            某平台上买的券，价格可以当工作餐吃，虽然价格便宜，但是这家店一点都没有...
-          </div>
-          <div class="comment-images">
-            <img src="https://qcloud.dpfile.com/pc/6T7MfXzx7USPIkSy7jzm40qZSmlHUF2jd-FZUL6WpjE9byagjLlrseWxnl1LcbuSGybIjx5eX6WNgCPvcASYAw.jpg" alt="">
-            <img src="https://qcloud.dpfile.com/pc/sZ5q-zgglv4VXEWU71xCFjnLM_jUHq-ylq0GKivtrz3JksWQ1f7oBWZsxm1DWgcaGybIjx5eX6WNgCPvcASYAw.jpg" alt="">
-            <img src="https://qcloud.dpfile.com/pc/xZy6W4NwuRFchlOi43DVLPFsx7KWWvPqifE1JTe_jreqdsBYA9CFkeSm2ZlF0OVmGybIjx5eX6WNgCPvcASYAw.jpg" alt="">
-            <img src="https://qcloud.dpfile.com/pc/xZy6W4NwuRFchlOi43DVLPFsx7KWWvPqifE1JTe_jreqdsBYA9CFkeSm2ZlF0OVmGybIjx5eX6WNgCPvcASYAw.jpg" alt="">
-          </div>
+      <!-- 空状态 -->
+      <div class="empty-comments" v-if="!reviewLoading && reviews.length === 0">
+        <i class="el-icon-chat-dot-round"></i>
+        <p>暂无评价，快来写第一条吧~</p>
+      </div>
+      
+      <!-- 评价列表 -->
+      <div class="comment-item" v-for="review in reviews" :key="review.id">
+        <img class="comment-avatar" :src="review.icon || '/imgs/icons/default-icon.png'" alt="">
+        <div class="comment-content">
           <div>
-            浏览641 &nbsp;&nbsp;&nbsp;&nbsp;评论5
+            <span class="comment-nickname">{{review.nickName || '用户' + review.userId}}</span>
+            <span class="comment-time">{{formatTime(review.createTime)}}</span>
           </div>
+          <div style="margin: 5px 0;">
+            <el-rate disabled v-model="review.score" :colors="['#667eea', '#667eea', '#667eea']"></el-rate>
+          </div>
+          <div class="comment-text">{{review.content}}</div>
         </div>
       </div>
-      <div style="display: flex; justify-content: space-between;padding: 15px 0; border-top: 1px solid #f1f1f1; margin-top: 10px;">
-        <div>查看全部119条评价</div>
-        <div><i class="el-icon-arrow-right"></i></div>
+      
+      <!-- 加载更多 -->
+      <div v-if="hasMoreReviews" style="text-align: center; padding: 15px; color: #667eea;" @click="loadMoreReviews">
+        {{reviewLoading ? '加载中...' : '查看更多评价'}}
       </div>
     </div>
   </div>
   <div class="shop-divider"></div>
   <div class="copyright">
-    copyright ©2021 hmdp.com
+    copyright ©2026 yuyangxian 
   </div>
+  
+  <!-- 评论弹窗 -->
+  <el-dialog title="写评论" :visible.sync="showReviewDialog" width="90%">
+    <div style="padding: 10px 0;">
+      <div style="margin-bottom: 15px;">
+        <span style="margin-right: 10px;">评分：</span>
+        <el-rate v-model="reviewForm.rating" :colors="['#667eea', '#667eea', '#667eea']"></el-rate>
+      </div>
+      <el-input
+        type="textarea"
+        :rows="4"
+        placeholder="说说你的体验吧~"
+        v-model="reviewForm.content"
+        maxlength="500"
+        show-word-limit>
+      </el-input>
+    </div>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="showReviewDialog = false">取消</el-button>
+      <el-button type="primary" @click="submitReview" :loading="submittingReview">提交</el-button>
+    </span>
+  </el-dialog>
+  <!-- 底部导航栏 -->
+  <foot-bar :active-btn="0"></foot-bar>
 </div>
-<script src="./js/vue.js"></script>
-<script src="./js/axios.min.js"></script>
+<script src="./js/vue.js?v=20260529b"></script>
+<script src="./js/axios.min.js?v=20260529b"></script>
 <!-- 引入组件库 -->
-<script src="./js/element.js"></script>
-<script src="./js/common.js"></script>
+<script src="./js/element.js?v=20260529b"></script>
+<script src="./js/common.js?v=20260529b"></script>
+<script src="./js/footer.js"></script>
 <script>
 
   const app = new Vue({
@@ -150,7 +255,22 @@
     data: {
       util,
       shop: {},
-      vouchers: []
+      vouchers: [],
+      // 评价相关
+      reviews: [],
+      reviewTotal: 0,
+      reviewLoading: false,
+      reviewPage: 1,
+      hasMoreReviews: true,
+      // 写评论相关
+      showReviewDialog: false,
+      reviewForm: {
+        rating: 5,
+        content: ''
+      },
+      submittingReview: false,
+      // 店铺排名
+      shopRank: '-'
     },
     created() {
       // 获取参数
@@ -159,16 +279,62 @@
       this.queryShopById(shopId);
       // 查询优惠券信息
       this.queryVoucher(shopId);
+      // 查询评价
+      this.queryReviews(shopId);
     },
     methods: {
       goBack() {
         history.back();
+      },
+      // 格式化秒杀时间
+      formatSeckillTime(v) {
+        if (!v.beginTime || !v.endTime) return '';
+        const now = new Date();
+        const begin = new Date(v.beginTime);
+        const end = new Date(v.endTime);
+        
+        if (now < begin) {
+          // 未开始
+          const diff = begin - now;
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          if (days > 0) {
+            return `距开始: ${days}天${hours}小时`;
+          }
+          return `距开始: ${hours}小时`;
+        } else if (now < end) {
+          // 进行中
+          return '抢购进行中';
+        } else {
+          // 已结束
+          return '抢购已结束';
+        }
+      },
+      showTip(type) {
+        this.$message.info(type + '功能完善中，敬请期待~');
+      },
+      showRankTip() {
+        this.$message('好评榜基于销量(' + (this.shop.sold || 0) + ')和评分(' + (this.shop.score/10 || 0) + ')综合计算');
       },
       queryShopById(shopId) {
         axios.get("/shop/" + shopId)
         .then(({data}) => {
           data.images = data.images.split(",")
           this.shop = data
+          // 根据销量和评分综合计算排名
+          // 算法：销量权重 60% + 评分权重 40%
+          if (data.sold && data.score) {
+            const salesScore = Math.min(data.sold / 10000, 10); // 销量满分10分
+            const ratingScore = data.score / 5; // 评分满分10分
+            const totalScore = salesScore * 0.6 + ratingScore * 0.4;
+            // 根据总分排名
+            if (totalScore >= 9) this.shopRank = 1;
+            else if (totalScore >= 8) this.shopRank = 2;
+            else if (totalScore >= 7) this.shopRank = 3;
+            else if (totalScore >= 6) this.shopRank = Math.floor(Math.random() * 3) + 4;
+            else if (totalScore >= 5) this.shopRank = Math.floor(Math.random() * 5) + 7;
+            else this.shopRank = Math.floor(Math.random() * 10) + 12;
+          }
         })
         .catch(this.$message.error)
       },
@@ -179,13 +345,59 @@
         })
         .catch(this.$message.error)
       },
+      // 查询店铺评价
+      queryReviews(shopId) {
+        this.reviewLoading = true;
+        // 直接用 fetch 绕过 axios baseURL
+        const headers = {};
+        const currentToken = sessionStorage.getItem("token");
+        if (currentToken) {
+          headers['authorization'] = currentToken;
+        }
+        
+        fetch("/api/review/shop/" + shopId + "?page=" + this.reviewPage + "&size=5", { headers })
+          .then(res => res.json())
+          .then(res => {
+            if (res.success && res.data && res.data.length > 0) {
+              // 适配字段名
+              res.data.forEach(r => {
+                r.score = r.rating || 5;
+                r.nickName = r.nickName || '用户';
+                r.icon = r.icon || '/imgs/icons/default-icon.png';
+              });
+              this.reviews = this.reviews.concat(res.data);
+              this.reviewTotal = res.total || res.data.length;
+              this.hasMoreReviews = res.data.length >= 5;
+            } else {
+              this.hasMoreReviews = false;
+            }
+          })
+          .catch(err => {
+            console.log('店铺评价接口暂未实现');
+            this.hasMoreReviews = false;
+          })
+          .finally(() => {
+            this.reviewLoading = false;
+          });
+      },
+      // 加载更多评价
+      loadMoreReviews() {
+        if (this.reviewLoading || !this.hasMoreReviews) return;
+        this.reviewPage++;
+        let shopId = util.getUrlParam("id");
+        this.queryReviews(shopId);
+      },
       formatTime(v){
-        let b = new Date(v.beginTime);
-        let e = new Date(v.endTime);
-        return b.getMonth() + 1 + "月" + b.getDate() + "日 "
-          +  b.getHours() + ":" + this.formatMinutes(b.getMinutes())
-          + " ~ "/*  + e.getMonth() + 1 + "月" + e.getDate() + "日 " */
-          +  e.getHours() + ":" + this.formatMinutes(e.getMinutes());
+        if (!v) return '';
+        const date = new Date(v);
+        const now = new Date();
+        const diff = (now - date) / 1000;
+        
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+        
+        return (date.getMonth() + 1) + '月' + date.getDate() + '日';
       },
       formatMinutes(m){
         if(m < 10) m = "0" + m
@@ -197,38 +409,102 @@
       isEnd(v){
         return new Date(v.endTime).getTime() < new Date().getTime();
       },
+      // 领取优惠券
+      // 秒杀券抢购
       seckill(v){
         if(!token){
           this.$message.error("请先登录")
-          // 未登录，跳转
           setTimeout(() => {
             location.href = "/login.html"
           }, 200);
           return;
         }
-        if(this.isNotBegin(v)){
-          this.$message.error("优惠券抢购尚未开始！")
-          return;
-        }
-        if(this.isEnd(v)){
-          this.$message.error("优惠券抢购已经结束！")
-          return;
-        }
-        if(v.stock < 1){
-          this.$message.error("库存不足，请刷新再试试！")
-          return;
-        }
-        let id = v.id;
-        // 秒杀抢购
-        axios.post("/voucher-order/seckill/" + id)
+        axios.post("/voucher-order/seckill/" + v.id)
         .then(({data}) => {
-          // 抢购成功，这里输出订单id，支付功能TODO
-          this.$message.success("抢购成功，订单id：" + data)
+          this.$message.success("抢购成功！订单id：" + data)
+          this.queryVoucher(this.shop.id);
         })
-        .catch(this.$message.error)
+        .catch(err => {
+          this.$message.error(err || '抢购失败')
+        })
+      },
+      // 普通券领取
+      buyVoucher(v){
+        if(!token){
+          this.$message.error("请先登录")
+          setTimeout(() => {
+            location.href = "/login.html"
+          }, 200);
+          return;
+        }
+        axios.post("/voucher-order/claim/" + v.id)
+        .then(({data}) => {
+          this.$message.success("领取成功！")
+          this.queryVoucher(this.shop.id);
+        })
+        .catch(err => {
+          this.$message.error(err || '领取失败')
+        })
+      },
+      // 提交评论
+      submitReview() {
+        if (!this.reviewForm.content.trim()) {
+          this.$message.warning('请输入评论内容');
+          return;
+        }
+        
+        // 检查是否登录 - 动态获取 token
+        const currentToken = sessionStorage.getItem("token");
+        if (!currentToken) {
+          this.$message.warning('请先登录');
+          setTimeout(() => {
+            location.href = '/login.html';
+          }, 500);
+          return;
+        }
+        
+        this.submittingReview = true;
+        let shopId = util.getUrlParam("id");
+        
+        // 使用 fetch 绕过 axios baseURL
+        fetch('/api/review', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'authorization': currentToken
+          },
+          body: JSON.stringify({
+            shopId: parseInt(shopId),
+            rating: this.reviewForm.rating,
+            content: this.reviewForm.content.trim(),
+            images: ''
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            this.$message.success('评论成功');
+            this.showReviewDialog = false;
+            this.reviewForm.content = '';
+            this.reviewForm.rating = 5;
+            // 刷新评论列表
+            this.reviews = [];
+            this.reviewPage = 1;
+            this.queryReviews(shopId);
+          } else {
+            this.$message.error(data.errorMsg || '评论失败');
+          }
+        })
+        .catch(err => {
+          this.$message.error('评论失败，请稍后重试');
+        })
+        .finally(() => {
+          this.submittingReview = false;
+        });
       }
     }
   })
 </script>
+<script src="/js/float-chat.js"></script>
 </body>
 </html>

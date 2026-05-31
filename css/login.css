@@ -1,63 +1,259 @@
-.login-container{
-    height: 100%;
+/* 覆盖 main.css 的全局样式 */
+body {
+    padding-bottom: 0 !important;
 }
-.header{
+
+#app {
+    height: auto !important;
+    min-height: 100vh;
+}
+
+/* 整体容器 */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-sizing: border-box;
+}
+
+/* 顶部导航 */
+.login-header {
     width: 100%;
-    height: 7%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 2px solid #ff6633;
-}
-.header-back-btn{
-    width: 10%;
-    color: #ff6633;
-    font-size: 22px;
-}
-.header-title {
-    width: 90%;
-    text-align: center;
-    font-size: 18px;
-    font-family: Hiragino Sans GB,Arial,Helvetica,"\5B8B\4F53",sans-serif;
+    padding: 15px 0;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.content{
-    height: 93%;
-    background-color: #f7f5f5;
-    padding: 10px;
+.back-btn {
+    width: 40px;
+    height: 40px;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.login-form {
-    height: 85%;
-}
-.login-radio {
-    height: 15%;
-    width: 100%;
-    display: flex;
-    align-items: start;
-}
-input[type="radio"] + label::before {
-    content: "\a0"; /*不换行空格*/
-    display: inline-block;
-    vertical-align: middle;
-    font-size: 12px;
-    width: 0.7em;
-    height: 0.7em;
-    margin-right: .4em;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
     border-radius: 50%;
-    border: 2px solid #F63;
-    text-indent: .15em;
-    line-height: 1; 
-    padding: .2em;
+    transition: all 0.3s;
 }
-input[type="radio"]:checked + label::before {
-    background-color: #F63;
-    background-clip: content-box;
-    padding: .2em;
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
-input[type="radio"] {
-    opacity: 0;
+
+.login-header .header-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.login-header .header-right {
+    width: 40px;
+}
+
+/* 品牌区域 */
+.brand-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.brand-icon {
+    font-size: 60px;
+    margin-bottom: 10px;
+}
+
+.brand-title {
+    font-size: 32px;
+    color: #fff;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.brand-desc {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    margin: 0;
+}
+
+/* 登录卡片 */
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* 表单 */
+.login-form {
+    padding: 24px;
+}
+
+.input-group {
+    margin-bottom: 16px;
+}
+
+.code-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.code-group .el-input {
+    flex: 1;
+}
+
+.code-btn {
+    flex-shrink: 0;
+    width: 110px !important;
+    height: 40px !important;
+    background: #fff !important;
+    border: 1px solid #dcdfe6 !important;
+    color: #667eea !important;
+    font-size: 13px !important;
+    border-radius: 4px !important;
+}
+
+.code-btn:hover:not(:disabled) {
+    color: #764ba2 !important;
+    border-color: #764ba2 !important;
+}
+
+.tip-text {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    margin: 16px 0;
+}
+
+.forget-link {
+    text-align: right;
+    margin: -8px 0 16px;
+}
+
+.forget-link a {
+    color: #667eea;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.forget-link a:hover {
+    color: #764ba2;
+}
+
+/* 登录按钮 */
+.login-btn {
+    width: 100% !important;
+    height: 44px !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    transition: all 0.3s;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* 其他登录方式 */
+.other-login {
+    text-align: right;
+    margin-top: 16px;
+}
+
+.other-login a {
+    color: #667eea;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.other-login a:hover {
+    color: #764ba2;
+}
+
+/* 用户协议 */
+.agreement {
+    margin-top: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.agreement input[type="radio"] {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    margin: 0;
+}
+
+.agreement label {
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+.agreement a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* Element UI 输入框样式调整 */
+.login-form .el-input__inner {
+    height: 40px !important;
+    line-height: 40px !important;
+}
+
+.login-form .el-input__prefix {
+    left: 10px;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+    .brand-icon {
+        font-size: 50px;
+    }
+    
+    .brand-title {
+        font-size: 28px;
+    }
+    
+    .login-card {
+        border-radius: 12px;
+    }
+    
+    .login-form {
+        padding: 20px;
+    }
+    
+    .code-btn {
+        width: 100px !important;
+        font-size: 12px !important;
+    }
 }
